@@ -1,0 +1,38 @@
+{
+  "name": "docker-mock",
+  "version": "0.0.1",
+  "description": "Mock for Docker",
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "mocha --bail --require should --reporter spec",
+    "coverage": "mocha --bail --require should --require blanket --reporter html-cov > coverage.html",
+    "travis": "mocha --bail --require should --reporter travis-cov"
+  },
+  "config": {
+    "travis-cov": {
+      "threshold": 98
+    }
+  },
+  "keywords": [
+    "docker",
+    "mock",
+    "testing"
+  ],
+  "author": "Bryan Kendall <bryan@bryankendall.com>",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^3.5.1",
+    "tar": "^0.1.19",
+    "zlib": "^1.0.5"
+  },
+  "devDependencies": {
+    "async": "^0.7.0",
+    "blanket": "^1.1.6",
+    "dockerode": "^1.2.9",
+    "mocha": "^1.18.2",
+    "request": "^2.34.0",
+    "should": "^3.3.0",
+    "tar-stream": "^0.3.2",
+    "travis-cov": "^0.2.5"
+  }
+}
