@@ -180,18 +180,9 @@ describe('misc', function () {
 describe('invalid endpoints', function () {
   describe('not yet implemented', function () {
     it('should respond with an error', function (done) {
-      request.get('http://localhost:5354/notYetImplemented', function (err, res) {
-        if (err) done(err);
-        else if (res.statusCode !== 500) done('should have sent a 500 error');
-        else done();
-      });
-    });
-  });
-  describe('not a docker endpoint', function () {
-    it('should respond with an error', function (done) {
       request.get('http://localhost:5354/_nope', function (err, res) {
         if (err) done(err);
-        else if (res.statusCode !== 404) done('should have sent a 404 error');
+        else if (res.statusCode !== 501) done('should have sent a 501 error');
         else done();
       });
     });
