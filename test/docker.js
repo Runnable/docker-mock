@@ -103,6 +103,18 @@ describe('images', function () {
       image.remove.bind(image)
     ], done);
   });
+  it('should emulate a build failure', function (done) {
+    var pack = tar.pack();
+    pack.entry({ name: './', type: 'directory' });
+    pack.entry({ name: './Dockerfile' }, 'FROM ubuntu\nADD ./src /root/src\n');
+    pack.entry({ name: './src', type: 'directory' });
+    pack.entry({ name: './src/index.js' }, 'console.log(\'hello\');\n');
+    pack.finalize();
+    docker.buildImage(pack, { t: 'doomedImage', fail: true }, function (err, res) {
+      if (err && err.statusCode === 500) done();
+      else done('should have failed');
+    });
+  });
   it('should be able to build images with namespace/repository, and delete it', function (done) {
     var pack = tar.pack();
     pack.entry({ name: './', type: 'directory' });
@@ -160,13 +172,20 @@ describe('images', function () {
       pack.entry({ name: './src', type: 'directory' });
       pack.entry({ name: './src/index.js' }, 'console.log(\'hello\');\n');
       pack.finalize();
-      docker.buildImage(pack, { t: 'testImage' }, done);
+      docker.buildImage(pack, { t: 'testImage' }, function (err, res) {
+        var stream = '';
+        res.on('data', function (data) { stream += data.toString(); });
+        res.on('end', function () {
+          stream.indexOf('Successfully built').should.not.equal(-1);
+          done();
+        });
+      });
     });
     afterEach(function (done) {
       docker.getImage('testImage').remove(done);
     });
     it('should list all the images', function (done) {
-      docker.listImages({}, function (err, images) {
+      docker.listImages(function (err, images) {
         if (err) return done(err);
         images.length.should.equal(1);
         images[0].RepoTags.length.should.equal(1);
