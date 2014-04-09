@@ -103,6 +103,19 @@ describe('images', function () {
       image.remove.bind(image)
     ], done);
   });
+  it('should be able to build images with namespace/repository, and delete it', function (done) {
+    var pack = tar.pack();
+    pack.entry({ name: './', type: 'directory' });
+    pack.entry({ name: './Dockerfile' }, 'FROM ubuntu\nADD ./src /root/src\n');
+    pack.entry({ name: './src', type: 'directory' });
+    pack.entry({ name: './src/index.js' }, 'console.log(\'hello\');\n');
+    pack.finalize();
+    var image = docker.getImage('docker-mock/buildTest');
+    async.series([
+      docker.buildImage.bind(docker, pack, { t: 'docker-mock/buildTest' }),
+      image.remove.bind(image)
+    ], done);
+  });
   it('should fail building an image w/o a dockerfile', function (done) {
     var badPack = tar.pack();
     badPack.entry({ name: './', type: 'directory' });
