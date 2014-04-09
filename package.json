@@ -5,7 +5,7 @@
   "main": "lib/index.js",
   "scripts": {
     "test": "mocha --bail --require should --reporter spec",
-    "coverage": "mocha --bail --require should --require blanket --reporter html-cov > coverage.html",
+    "coverage": "mocha --bail --require should --reporter html-cov > coverage.html",
     "travis": "mocha --bail --require should --reporter travis-cov"
   },
   "config": {

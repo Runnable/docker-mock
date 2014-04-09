@@ -1,5 +1,6 @@
 var blanket = require('blanket')({
-  'pattern': 'dockermock/lib/'
+  'pattern': 'lib',
+  'data-cover-never': 'node_modules'
 });
 
 var dockerMock = require('../lib/index');
