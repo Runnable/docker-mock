@@ -19,11 +19,14 @@
     "testing"
   ],
   "author": "Bryan Kendall <bryan@bryankendall.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Runnable/docker-mock"
+  },
   "license": "MIT",
   "dependencies": {
     "express": "^3.5.1",
-    "tar": "^0.1.19",
-    "zlib": "^1.0.5"
+    "tar": "^0.1.19"
   },
   "devDependencies": {
     "async": "^0.7.0",
