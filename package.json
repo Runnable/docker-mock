@@ -6,7 +6,8 @@
   "scripts": {
     "test": "mocha --bail --require should --reporter spec",
     "coverage": "mocha --bail --require should --reporter html-cov > coverage.html",
-    "travis": "mocha --bail --require should --reporter travis-cov"
+    "travis": "mocha --bail --require should --reporter travis-cov",
+    "coverage-all": "npm run coverage && npm run travis"
   },
   "config": {
     "travis-cov": {
