@@ -5,11 +5,15 @@
   "main": "lib/index.js",
   "scripts": {
     "test": "mocha --bail --require should --reporter spec",
-    "coverage": "mocha --bail --require should --reporter html-cov > coverage.html",
-    "travis": "mocha --bail --require should --reporter travis-cov",
+    "coverage": "mocha --bail --require blanket --require should --reporter html-cov > coverage.html",
+    "travis": "mocha --bail --require blanket --require should --reporter travis-cov",
     "coverage-all": "npm run coverage && npm run travis"
   },
   "config": {
+    "blanket": {
+      "pattern": "lib",
+      "data-cover-never": "node_modules"
+    },
     "travis-cov": {
       "threshold": 98
     }
@@ -27,7 +31,9 @@
   "license": "MIT",
   "dependencies": {
     "express": "^3.5.1",
-    "tar": "^0.1.19"
+    "tar": "^0.1.19",
+    "middleware-flow": "~0.2.0",
+    "lodash": "~2.4.1"
   },
   "devDependencies": {
     "async": "^0.7.0",
