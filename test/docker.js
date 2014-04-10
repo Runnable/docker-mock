@@ -98,10 +98,7 @@ describe('images', function () {
     pack.entry({ name: './src/index.js' }, 'console.log(\'hello\');\n');
     pack.finalize();
     var image = docker.getImage('buildTest');
-    async.series([
-      docker.buildImage.bind(docker, pack, { t: 'buildTest' }),
-      image.remove.bind(image)
-    ], done);
+    docker.buildImage(pack, { t: 'buildTest' }, watchBuild(image, done));
   });
   it('should emulate a build failure', function (done) {
     var pack = tar.pack();
@@ -110,10 +107,7 @@ describe('images', function () {
     pack.entry({ name: './src', type: 'directory' });
     pack.entry({ name: './src/index.js' }, 'console.log(\'hello\');\n');
     pack.finalize();
-    docker.buildImage(pack, { t: 'doomedImage', fail: true }, function (err, res) {
-      if (err && err.statusCode === 500) done();
-      else done('should have failed');
-    });
+    docker.buildImage(pack, { t: 'doomedImage', fail: true }, watchBuildFail(done));
   });
   it('should be able to build images with namespace/repository, and delete it', function (done) {
     var pack = tar.pack();
@@ -123,10 +117,17 @@ describe('images', function () {
     pack.entry({ name: './src/index.js' }, 'console.log(\'hello\');\n');
     pack.finalize();
     var image = docker.getImage('docker-mock/buildTest');
-    async.series([
-      docker.buildImage.bind(docker, pack, { t: 'docker-mock/buildTest' }),
-      image.remove.bind(image)
-    ], done);
+    docker.buildImage(pack, { t: 'docker-mock/buildTest' }, watchBuild(image, done));
+  });
+  it('should be able to build images with registry/namespace/repository, and delete it', function (done) {
+    var pack = tar.pack();
+    pack.entry({ name: './', type: 'directory' });
+    pack.entry({ name: './Dockerfile' }, 'FROM ubuntu\nADD ./src /root/src\n');
+    pack.entry({ name: './src', type: 'directory' });
+    pack.entry({ name: './src/index.js' }, 'console.log(\'hello\');\n');
+    pack.finalize();
+    var image = docker.getImage('localhost:5000/docker-mock/buildTest');
+    docker.buildImage(pack, { t: 'localhost:5000/docker-mock/buildTest' }, watchBuild(image, done));
   });
   it('should fail building an image w/o a dockerfile', function (done) {
     var badPack = tar.pack();
@@ -134,10 +135,7 @@ describe('images', function () {
     badPack.entry({ name: './src', type: 'directory' });
     badPack.entry({ name: './src/index.js' }, 'console.log(\'hello\');\n');
     badPack.finalize();
-    docker.buildImage(badPack, { t: 'buildTest' }, function (err, data) {
-      if (err) done();
-      else done('should not have built w/o dockerfile');
-    });
+    docker.buildImage(badPack, { t: 'buildTest' }, watchBuildFail(done));
   });
   it('should build an image that has been gzipped', function (done) {
     var pack = tar.pack();
@@ -172,14 +170,7 @@ describe('images', function () {
       pack.entry({ name: './src', type: 'directory' });
       pack.entry({ name: './src/index.js' }, 'console.log(\'hello\');\n');
       pack.finalize();
-      docker.buildImage(pack, { t: 'testImage' }, function (err, res) {
-        var stream = '';
-        res.on('data', function (data) { stream += data.toString(); });
-        res.on('end', function () {
-          stream.indexOf('Successfully built').should.not.equal(-1);
-          done();
-        });
-      });
+      docker.buildImage(pack, { t: 'testImage' }, watchBuild(done));
     });
     afterEach(function (done) {
       docker.getImage('testImage').remove(done);
@@ -213,10 +204,32 @@ describe('invalid endpoints', function () {
   describe('not yet implemented', function () {
     it('should respond with an error', function (done) {
       request.get('http://localhost:5354/_nope', function (err, res) {
-        if (err) done(err);
+        if (err && res.statusCode === 501) done(err);
         else if (res.statusCode !== 501) done('should have sent a 501 error');
         else done();
       });
     });
   });
 });
+
+function watchBuild(removeImage, done) {
+  if (typeof removeImage === 'function') {
+    done = removeImage;
+    removeImage = false;
+  }
+  return function (err, res) {
+    if (err) return done(err);
+    res.on('data', function () {});
+    res.on('end', function () {
+      if (removeImage) removeImage.remove(done);
+      else done();
+    });
+  };
+}
+
+function watchBuildFail(done) {
+  return function (err, res) {
+    if (err && err.statusCode === 500) done();
+    else done('expected to fail');
+  };
+}
