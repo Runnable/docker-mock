@@ -1,8 +1,3 @@
-var blanket = require('blanket')({
-  'pattern': 'lib',
-  'data-cover-never': 'node_modules'
-});
-
 var dockerMock = require('../lib/index');
 var async = require('async');
 var request = require('request');
@@ -61,30 +56,114 @@ describe('containers', function () {
         else done('should have return a 404');
       });
     });
+    it('should be able to commit a container to an image', function (done) {
+      async.waterfall([
+        function (cb) {
+          container.commit({
+            tag: 'committedContainer'
+          }, cb);
+        },
+        function (imageData, cb) {
+          var image = docker.getImage('committedContainer');
+          image.inspect(function (err, data) {
+            if (err) return cb(err);
+            data.id.indexOf(imageData.Id).should.equal(0);
+            cb(null, image);
+          });
+        },
+        function (image, cb) {
+          image.remove(cb);
+        }
+      ], done);
+    });
     it('should be able to start it', function (done) {
-      container.start(done);
+      container.start(function (err) {
+        if (err) return done(err);
+        container.inspect(function (err, data) {
+          if (err) return done(err);
+          data.State.Running.should.equal.true;
+          done();
+        });
+      });
     });
     it('should should not start twice', function (done) {
-      container.start(function (err, data) {
-        if (err) return done(err);
-        container.start(function (err, data) {
-          if (err) done();
-          else done('should not have started second time');
+      async.series([
+        container.start.bind(container),
+        container.start.bind(container)
+      ], function (err) {
+        if (!err) return done('should not have started second time');
+        container.inspect(function (err, data) {
+          if (err) return done(err);
+          data.State.Running.should.equal.true;
+          done();
         });
       });
     });
     it('should be able to stop it', function (done) {
-      async.waterfall([
+      async.series([
         container.start.bind(container),
         container.stop.bind(container)
-      ], done);
+      ], function (err) {
+        if (err) return done(err);
+        container.inspect(function (err, data) {
+          if (err) return done(err);
+          data.State.Running.should.equal.false;
+          done();
+        });
+      });
+    });
+    it('should be able to stop and wait for it to stop', function (done) {
+      async.series([
+        container.start.bind(container),
+        container.wait.bind(container)
+      ], function (err) {
+        if (err) return done(err);
+        container.inspect(function (err, data) {
+          if (err) return done(err);
+          data.State.Running.should.equal.false;
+          done();
+        });
+      });
     });
     it('should noop if stopped twice', function (done) {
-      async.waterfall([
+      async.series([
         container.start.bind(container),
         container.stop.bind(container),
         container.stop.bind(container)
-      ], done);
+      ], function (err) {
+        if (err) return done(err);
+        container.inspect(function (err, data) {
+          if (err) return done(err);
+          data.State.Running.should.equal.false;
+          done();
+        });
+      });
+    });
+    it('should be able to kill it', function (done) {
+      async.series([
+        container.start.bind(container),
+        container.kill.bind(container)
+      ], function (err) {
+        if (err) return done(err);
+        container.inspect(function (err, data) {
+          if (err) return done(err);
+          data.State.Running.should.equal.false;
+          done();
+        });
+      });
+    });
+    it('should be able to restart it', function (done) {
+      async.series([
+        container.start.bind(container),
+        container.restart.bind(container)
+      ], function (err) {
+        if (err) return done(err);
+        container.inspect(function (err, data) {
+          if (err) return done(err);
+          data.State.Running.should.equal.true;
+          done();
+        });
+      });
     });
   });
 });
@@ -201,35 +280,77 @@ describe('misc', function () {
 });
 
 describe('invalid endpoints', function () {
-  describe('not yet implemented', function () {
-    it('should respond with an error', function (done) {
-      request.get('http://localhost:5354/_nope', function (err, res) {
-        if (err && res.statusCode === 501) done(err);
-        else if (res.statusCode !== 501) done('should have sent a 501 error');
-        else done();
-      });
+  it('should respond with an error', function (done) {
+    request.get('http://localhost:5354/_nope', function (err, res) {
+      if (err && res.statusCode === 501) done(err);
+      else if (res.statusCode !== 501) done('should have sent a 501 error');
+      else done();
     });
   });
 });
 
-function watchBuild(removeImage, done) {
+afterEach(checkClean);
+beforeEach(checkClean);
+
+function checkClean (cb) {
+  // the repository should be clean!
+  async.parallel([
+    checkImages,
+    checkContainers,
+    checkInfo
+  ], cb);
+}
+
+function checkImages (cb) {
+  async.waterfall([
+    docker.listImages.bind(docker, {}),
+    function (images, cb) {
+      images.length.should.equal(0);
+      cb();
+    }
+  ], cb);
+}
+
+function checkContainers (cb) {
+  async.waterfall([
+    docker.listContainers.bind(docker),
+    function (containers, cb) {
+      containers.length.should.equal(0);
+      cb();
+    }
+  ], cb);
+}
+
+function checkInfo (cb) {
+  async.waterfall([
+    docker.info.bind(docker),
+    function (data, cb) {
+      data.Containers.should.equal(0);
+      data.Images.should.equal(0);
+      data.Mock.should.be.true;
+      cb();
+    }
+  ], cb);
+}
+
+function watchBuild(removeImage, cb) {
   if (typeof removeImage === 'function') {
-    done = removeImage;
+    cb = removeImage;
     removeImage = false;
   }
   return function (err, res) {
-    if (err) return done(err);
+    if (err) return cb(err);
     res.on('data', function () {});
     res.on('end', function () {
-      if (removeImage) removeImage.remove(done);
-      else done();
+      if (removeImage) removeImage.remove(cb);
+      else cb();
     });
   };
 }
 
-function watchBuildFail(done) {
+function watchBuildFail(cb) {
   return function (err, res) {
-    if (err && err.statusCode === 500) done();
-    else done('expected to fail');
+    if (err && err.statusCode === 500) cb();
+    else cb('expected to fail');
   };
 }
