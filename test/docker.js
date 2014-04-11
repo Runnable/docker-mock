@@ -77,29 +77,93 @@ describe('containers', function () {
       ], done);
     });
     it('should be able to start it', function (done) {
-      container.start(done);
+      container.start(function (err) {
+        if (err) return done(err);
+        container.inspect(function (err, data) {
+          if (err) return done(err);
+          data.State.Running.should.equal.true;
+          done();
+        });
+      });
     });
     it('should should not start twice', function (done) {
-      container.start(function (err, data) {
-        if (err) return done(err);
-        container.start(function (err, data) {
-          if (err) done();
-          else done('should not have started second time');
+      async.series([
+        container.start.bind(container),
+        container.start.bind(container)
+      ], function (err) {
+        if (!err) return done('should not have started second time');
+        container.inspect(function (err, data) {
+          if (err) return done(err);
+          data.State.Running.should.equal.true;
+          done();
         });
       });
     });
     it('should be able to stop it', function (done) {
-      async.waterfall([
+      async.series([
         container.start.bind(container),
         container.stop.bind(container)
-      ], done);
+      ], function (err) {
+        if (err) return done(err);
+        container.inspect(function (err, data) {
+          if (err) return done(err);
+          data.State.Running.should.equal.false;
+          done();
+        });
+      });
+    });
+    it('should be able to stop and wait for it to stop', function (done) {
+      async.series([
+        container.start.bind(container),
+        container.wait.bind(container)
+      ], function (err) {
+        if (err) return done(err);
+        container.inspect(function (err, data) {
+          if (err) return done(err);
+          data.State.Running.should.equal.false;
+          done();
+        });
+      });
     });
     it('should noop if stopped twice', function (done) {
-      async.waterfall([
+      async.series([
         container.start.bind(container),
         container.stop.bind(container),
         container.stop.bind(container)
-      ], done);
+      ], function (err) {
+        if (err) return done(err);
+        container.inspect(function (err, data) {
+          if (err) return done(err);
+          data.State.Running.should.equal.false;
+          done();
+        });
+      });
+    });
+    it('should be able to kill it', function (done) {
+      async.series([
+        container.start.bind(container),
+        container.kill.bind(container)
+      ], function (err) {
+        if (err) return done(err);
+        container.inspect(function (err, data) {
+          if (err) return done(err);
+          data.State.Running.should.equal.false;
+          done();
+        });
+      });
+    });
+    it('should be able to restart it', function (done) {
+      async.series([
+        container.start.bind(container),
+        container.restart.bind(container)
+      ], function (err) {
+        if (err) return done(err);
+        container.inspect(function (err, data) {
+          if (err) return done(err);
+          data.State.Running.should.equal.true;
+          done();
+        });
+      });
     });
   });
 });
