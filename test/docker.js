@@ -275,6 +275,32 @@ describe('images', function () {
           done();
         }));
     });
+    describe('private', function() {
+      beforeEach(function (done) {
+        var pack = tar.pack();
+        pack.entry({ name: './', type: 'directory' });
+        pack.entry({ name: './Dockerfile' }, 'FROM ubuntu\nADD ./src /root/src\n');
+        pack.entry({ name: './src', type: 'directory' });
+        pack.entry({ name: './src/index.js' }, 'console.log(\'hello\');\n');
+        pack.finalize();
+        this.repo = 'private.com/hey/testImage';
+        docker.buildImage(pack, { t: this.repo }, watchBuild(done));
+      });
+      afterEach(function (done) {
+        docker.getImage(this.repo).remove(done);
+      });
+      it('should push a private image', function (done) {
+        docker.getImage('testImage')
+          .push({}, handlePushStream(done));
+      });
+      it('should not push a private image if it doesnt exist', function (done) {
+        docker.getImage('nonexistantImage')
+          .push({}, handlePushStream(function (err) {
+            err.statusCode.should.equal(404);
+            done();
+          }));
+      });
+    });
   });
 });
 
