@@ -290,11 +290,11 @@ describe('images', function () {
         docker.getImage(this.repo).remove(done);
       });
       it('should push a private image', function (done) {
-        docker.getImage('testImage')
+        docker.getImage(this.repo)
           .push({}, handlePushStream(done));
       });
       it('should not push a private image if it doesnt exist', function (done) {
-        docker.getImage('nonexistantImage')
+        docker.getImage('private.com/hey/nonexistantImage')
           .push({}, handlePushStream(function (err) {
             err.statusCode.should.equal(404);
             done();
