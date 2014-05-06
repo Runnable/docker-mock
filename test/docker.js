@@ -3,6 +3,7 @@ var async = require('async');
 var request = require('request');
 var tar = require('tar-stream');
 var zlib = require('zlib');
+var noop = function () {};
 dockerMock.listen(5354);
 
 var docker = require('dockerode')({host: 'http://localhost', port: 5354});
@@ -232,7 +233,7 @@ describe('images', function () {
     })).on('end', function (err, data) {
       if (err) return done(err);
       image.remove(done);
-    }); 
+    });
   });
   it('should list all the images when there are none', function (done) {
     docker.listImages({}, function (err, images) {
@@ -261,6 +262,43 @@ describe('images', function () {
         images[0].RepoTags.length.should.equal(1);
         images[0].RepoTags[0].should.equal('testImage');
         done();
+      });
+    });
+    it('should push an image', function (done) {
+      docker.getImage('testImage')
+        .push({}, handlePushStream(done));
+    });
+    it('should not push an image if it doesnt exist', function (done) {
+      docker.getImage('nonexistantImage')
+        .push({}, handlePushStream(function (err) {
+          err.statusCode.should.equal(404);
+          done();
+        }));
+    });
+    describe('private', function() {
+      beforeEach(function (done) {
+        var pack = tar.pack();
+        pack.entry({ name: './', type: 'directory' });
+        pack.entry({ name: './Dockerfile' }, 'FROM ubuntu\nADD ./src /root/src\n');
+        pack.entry({ name: './src', type: 'directory' });
+        pack.entry({ name: './src/index.js' }, 'console.log(\'hello\');\n');
+        pack.finalize();
+        this.repo = 'private.com/hey/testImage';
+        docker.buildImage(pack, { t: this.repo }, watchBuild(done));
+      });
+      afterEach(function (done) {
+        docker.getImage(this.repo).remove(done);
+      });
+      it('should push a private image', function (done) {
+        docker.getImage('testImage')
+          .push({}, handlePushStream(done));
+      });
+      it('should not push a private image if it doesnt exist', function (done) {
+        docker.getImage('nonexistantImage')
+          .push({}, handlePushStream(function (err) {
+            err.statusCode.should.equal(404);
+            done();
+          }));
       });
     });
   });
@@ -352,5 +390,26 @@ function watchBuildFail(cb) {
   return function (err, res) {
     if (err && err.statusCode === 500) cb();
     else cb('expected to fail');
+  };
+}
+
+function handlePushStream (cb) {
+  return function (err, res) {
+    if (err) {
+      cb(err);
+    }
+    else {
+      var errorred = false;
+      res.on('error', function (err) {
+        errorred = err;
+        cb(err);
+      });
+      res.on('data', noop);
+      res.on('end', function () {
+        if (!errorred) {
+          cb();
+        }
+      });
+    }
   };
 }
