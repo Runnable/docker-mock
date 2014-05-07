@@ -61,7 +61,7 @@ describe('containers', function () {
       async.waterfall([
         function (cb) {
           container.commit({
-            tag: 'committedContainer'
+            repo: 'committedContainer'
           }, cb);
         },
         function (imageData, cb) {
@@ -206,8 +206,8 @@ describe('images', function () {
     pack.entry({ name: './src', type: 'directory' });
     pack.entry({ name: './src/index.js' }, 'console.log(\'hello\');\n');
     pack.finalize();
-    var image = docker.getImage('localhost:5000/docker-mock/buildTest');
-    docker.buildImage(pack, { t: 'localhost:5000/docker-mock/buildTest' }, watchBuild(image, done));
+    var image = docker.getImage('private.com/docker-mock/buildTest');
+    docker.buildImage(pack, { t: 'private.com/docker-mock/buildTest' }, watchBuild(image, done));
   });
   it('should fail building an image w/o a dockerfile', function (done) {
     var badPack = tar.pack();
@@ -260,7 +260,7 @@ describe('images', function () {
         if (err) return done(err);
         images.length.should.equal(1);
         images[0].RepoTags.length.should.equal(1);
-        images[0].RepoTags[0].should.equal('testImage');
+        images[0].RepoTags[0].should.equal('testImage:latest');
         done();
       });
     });
