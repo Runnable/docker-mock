@@ -1,9 +1,8 @@
 {
   "name": "docker-mock",
-  "version": "0.0.8",
+  "version": "0.0.11",
   "description": "Mock for Docker",
-  "ma
-in": "lib/index.js",
+  "main": "lib/index.js",
   "scripts": {
     "test": "mocha --bail --require should --reporter spec",
     "coverage": "mocha --bail --require blanket --require should --reporter html-cov > coverage.html",
