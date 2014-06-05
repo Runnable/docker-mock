@@ -1,6 +1,5 @@
 # docker-mock 
 
-change1
 
 [![Build Status](https://travis-ci.org/Runnable/docker-mock.svg?branch=master)](https://travis-ci.org/Runnable/docker-mock)
 
