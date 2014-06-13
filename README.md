@@ -1,7 +1,7 @@
 # docker-mock 
 
 
-[![Build Status](https://travis-ci.org/Runnable/docker-mock.svg?branch=master)](https://travis-ci.org/Runnable/docker-mock)
+[![Build Status](https://travis-ci.org/Runnable/docker-mock.svg?branch=master)](https://travis-ci.org/Runnable/docker-mock) [![Dependency Status](https://david-dm.org/Runnable/docker-mock.svg)](https://david-dm.org/Runnable/docker-mock) [![devDependency Status](https://david-dm.org/Runnable/docker-mock/dev-status.svg)](https://david-dm.org/Runnable/docker-mock#info=devDependencies)
 
 [![NPM](https://nodei.co/npm/docker-mock.png?compact=true)](https://nodei.co/npm/docker-mock/)
 

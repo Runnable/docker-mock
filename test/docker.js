@@ -51,6 +51,13 @@ describe('containers', function () {
         done();
       });
     });
+    it('should attach to the container', function (done) {
+      container.attach({}, function (err, stream) {
+        if (err) return done(err);
+        stream.on('data', function (data) {});
+        stream.on('end', function () { done(); });
+      });
+    });
     it('should error on an unknown container', function (done) {
       docker.getContainer('nope').inspect(function (err, data) {
         if (err) done();
