@@ -90,6 +90,7 @@ describe('containers', function () {
         container.inspect(function (err, data) {
           if (err) return done(err);
           data.State.Running.should.equal.true;
+          data.State.Pid.should.equal(123);
           done();
         });
       });
@@ -103,6 +104,7 @@ describe('containers', function () {
         container.inspect(function (err, data) {
           if (err) return done(err);
           data.State.Running.should.equal.true;
+          data.State.Pid.should.equal(123);
           done();
         });
       });
@@ -116,6 +118,7 @@ describe('containers', function () {
         container.inspect(function (err, data) {
           if (err) return done(err);
           data.State.Running.should.equal.false;
+          data.State.Pid.should.equal(-1);
           done();
         });
       });
@@ -129,6 +132,7 @@ describe('containers', function () {
         container.inspect(function (err, data) {
           if (err) return done(err);
           data.State.Running.should.equal.false;
+          data.State.Pid.should.equal(-1);
           done();
         });
       });
@@ -143,6 +147,7 @@ describe('containers', function () {
         container.inspect(function (err, data) {
           if (err) return done(err);
           data.State.Running.should.equal.false;
+          data.State.Pid.should.equal(-1);
           done();
         });
       });
@@ -155,6 +160,7 @@ describe('containers', function () {
         if (err) return done(err);
         container.inspect(function (err, data) {
           if (err) return done(err);
+          // FIXME: these test are broken. this does not return false
           data.State.Running.should.equal.false;
           done();
         });
@@ -168,6 +174,7 @@ describe('containers', function () {
         if (err) return done(err);
         container.inspect(function (err, data) {
           if (err) return done(err);
+          // FIXME: these test are broken. this does not return true
           data.State.Running.should.equal.true;
           done();
         });
