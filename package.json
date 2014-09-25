@@ -1,6 +1,6 @@
 {
   "name": "docker-mock",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Mock for Docker",
   "main": "lib/index.js",
   "scripts": {
