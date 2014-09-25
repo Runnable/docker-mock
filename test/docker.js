@@ -17,6 +17,23 @@ describe('containers', function () {
       }
     ], done);
   });
+  it('should create a container with env in the body', function (done) {
+    var createData = {
+      Env: [ 'MY_AWESOME_ENV_VARIABLE=inconceivable' ]
+    };
+    async.waterfall([
+      docker.createContainer.bind(docker, createData),
+      function (container, cb) {
+        container.inspect(cb);
+      }
+    ], function (err, containerData) {
+      if (err) return done(err);
+      Array.isArray(containerData.Env).should.equal(true);
+      containerData.Env.length.should.equal(1);
+      containerData.Env[0].should.equal(createData.Env[0]);
+      docker.getContainer(containerData.Id).remove(done);
+    });
+  });
   it('should list all the containers when there are none', function (done) {
     docker.listContainers(function (err, containers) {
       if (err) return done(err);
