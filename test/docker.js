@@ -137,18 +137,20 @@ describe('containers', function () {
         });
       });
     });
-    it('should noop if stopped twice', function (done) {
+    it('should come back with an error if stopped twice', function (done) {
       async.series([
         container.start.bind(container),
-        container.stop.bind(container),
         container.stop.bind(container)
       ], function (err) {
         if (err) return done(err);
-        container.inspect(function (err, data) {
-          if (err) return done(err);
-          data.State.Running.should.equal(false);
-          data.State.Pid.should.equal(-1);
-          done();
+        container.stop(function (err, data) {
+          err.statusCode.should.equal(304);
+          container.inspect(function (err, data) {
+            if (err) return done(err);
+            data.State.Running.should.equal(false);
+            data.State.Pid.should.equal(-1);
+            done();
+          });
         });
       });
     });
@@ -378,7 +380,7 @@ function checkInfo (cb) {
     function (data, cb) {
       data.Containers.should.equal(0);
       data.Images.should.equal(0);
-      data.Mock.should.be.true;
+      data.Mock.should.equal(true);
       cb();
     }
   ], cb);
