@@ -1,10 +1,19 @@
-# docker-mock 
+# docker-mock
 
 [![Build Status](https://travis-ci.org/Runnable/docker-mock.svg?branch=master)](https://travis-ci.org/Runnable/docker-mock) [![Dependency Status](https://david-dm.org/Runnable/docker-mock.svg)](https://david-dm.org/Runnable/docker-mock) [![devDependency Status](https://david-dm.org/Runnable/docker-mock/dev-status.svg)](https://david-dm.org/Runnable/docker-mock#info=devDependencies)
 
 [![NPM](https://nodei.co/npm/docker-mock.png?compact=true)](https://nodei.co/npm/docker-mock/)
 
 A mock for [Docker](http://docker.io)!
+
+## Usage
+
+Require it from your node program:
+
+    var dockerMock = require('docker-mock');
+    dockerMock.listen(5354);
+
+You can also use the command line interface, just run `docker-mock` after installing the package globally.
 
 ## Examples
 

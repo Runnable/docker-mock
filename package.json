@@ -3,6 +3,7 @@
   "version": "0.2.1",
   "description": "Mock for Docker",
   "main": "lib/index.js",
+  "bin": "./lib/cli.js" ,
   "scripts": {
     "test": "mocha --bail --require should --reporter spec",
     "coverage": "mocha --bail --require blanket --require should --reporter html-cov > coverage.html",
@@ -34,7 +35,8 @@
     "express": "^4.6.1",
     "lodash": "^2.4.1",
     "middleware-flow": "^0.5.1",
-    "tar": "^0.1.20"
+    "tar": "^0.1.20",
+    "minimist": "~1.1.0"
   },
   "devDependencies": {
     "async": "~0.9.0",
