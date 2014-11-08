@@ -208,6 +208,16 @@ describe('containers', function () {
 });
 
 describe('images', function () {
+  it('should create and delete a image', function (done) {
+    async.series([
+      docker.createImage.bind(docker, { fromImage: "base" }),
+      docker.listImages.bind(docker, {}, function (err, images) {
+        if (err) return done(err);
+        images.length.should.equal(1);
+        docker.getImage("base").remove(done);
+      })
+    ], done);
+  });
   it('should be able to build images, and delete it', function (done) {
     var pack = tar.pack();
     pack.entry({ name: './', type: 'directory' });
