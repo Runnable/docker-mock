@@ -10,8 +10,10 @@ A mock for [Docker](http://docker.io)!
 
 Require it from your node program:
 
-    var dockerMock = require('docker-mock');
-    dockerMock.listen(5354);
+```javascript
+var dockerMock = require('docker-mock');
+dockerMock.listen(5354);
+```
 
 You can also use the command line interface, just run `docker-mock` after installing the package globally.
 
