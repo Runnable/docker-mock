@@ -3,6 +3,8 @@ var async = require('async');
 var request = require('request');
 var tar = require('tar-stream');
 var zlib = require('zlib');
+var concat = require('concat-stream');
+var createCount = require('callback-count');
 var noop = function () {};
 dockerMock.listen(5354);
 
@@ -109,6 +111,20 @@ describe('containers', function () {
           data.State.Running.should.equal(true);
           data.State.Pid.should.be.type('number');
           done();
+        });
+      });
+    });
+    it('should be able to get the logs', function (done) {
+      container.start(function (err) {
+        if (err) return done(err);
+        container.logs({}, function (err, logs) {
+          if (err) return done(err);
+          var count = createCount(2, done);
+          logs.pipe(concat(function (data) {
+            data.toString().should.eql('Just a bunch of text');
+            count.next();
+          }));
+          logs.on('end', function () { count.next(); });
         });
       });
     });
