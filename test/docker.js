@@ -5,6 +5,7 @@ var tar = require('tar-stream');
 var zlib = require('zlib');
 var concat = require('concat-stream');
 var createCount = require('callback-count');
+var JSONStream = require('JSONStream');
 var noop = function () {};
 dockerMock.listen(5354);
 
@@ -356,6 +357,59 @@ describe('images', function () {
       });
     });
   });
+});
+
+describe('events', function () {
+
+
+  it('should return one time result when since is provided', function (done) {
+    docker.getEvents({since: new Date().getTime()}, function (err, eventStream) {
+      if (err) return done(err);
+      var count = createCount(100, done);
+      var i = 0;
+      eventStream.pipe(JSONStream.parse()).on('data', function (json) {
+        json.status.should.be.a.String;
+        json.id.should.be.a.String;
+        json.from.should.be.a.String;
+        json.time.should.be.a.Number;
+        count.next();
+      })
+    });
+  });
+
+  it('should return one time result when until is provided', function (done) {
+    docker.getEvents({until: new Date().getTime()}, function (err, eventStream) {
+      if (err) return done(err);
+      var count = createCount(100, done);
+      var i = 0;
+      eventStream.pipe(JSONStream.parse()).on('data', function (json) {
+        json.status.should.be.a.String;
+        json.id.should.be.a.String;
+        json.from.should.be.a.String;
+        json.time.should.be.a.Number;
+        count.next();
+      })
+    });
+  });
+
+  it('should stream events', function (done) {
+    docker.getEvents(function (err, eventStream) {
+      if (err) return done(err);
+      var count = createCount(10, done);
+      eventStream.on('error', done);
+      eventStream.on('end', done);
+      eventStream.on('close', done);
+      eventStream.on('data', function (data) {
+        var json = JSON.parse(data.toString());
+        json.status.should.be.a.String;
+        json.id.should.be.a.String;
+        json.from.should.be.a.String;
+        json.time.should.be.a.Number;
+        count.next();
+      });
+    });
+  });
+
 });
 
 describe('misc', function () {

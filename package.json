@@ -41,6 +41,7 @@
     "minimist": "~1.1.0"
   },
   "devDependencies": {
+    "JSONStream": "^0.9.0",
     "async": "~0.9.0",
     "blanket": "^1.1.6",
     "callback-count": "^0.1.0",
