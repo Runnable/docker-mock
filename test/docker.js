@@ -396,9 +396,6 @@ describe('events', function () {
     docker.getEvents(function (err, eventStream) {
       if (err) return done(err);
       var count = createCount(10, done);
-      eventStream.on('error', done);
-      eventStream.on('end', done);
-      eventStream.on('close', done);
       eventStream.on('data', function (data) {
         var json = JSON.parse(data.toString());
         json.status.should.be.a.String;
