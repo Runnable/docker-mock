@@ -392,11 +392,37 @@ describe('events', function () {
     });
   });
 
-  it('should stream events', function (done) {
+  it('should stream emitted events', function (done) {
+    process.env.DISABLE_RANDOM_EVENTS = true;
+    setInterval(function () {
+      dockerMock.events.stream.emit('data', dockerMock.events.generateEvent());
+    }, 100);
+    docker.getEvents(function (err, eventStream) {
+      if (err) return done(err);
+      var count = createCount(10, done);
+      var i = 0;
+      eventStream.on('data', function (data) {
+        var json = JSON.parse(data.toString());
+        json.status.should.be.a.String;
+        json.id.should.be.a.String;
+        json.from.should.be.a.String;
+        json.time.should.be.a.Number;
+        if (i < 10) {
+          count.next();
+        }
+        i++;
+      });
+    });
+  });
+
+
+  it('should stream random generated events', function (done) {
+    delete process.env.DISABLE_RANDOM_EVENTS;
     docker.getEvents(function (err, eventStream) {
       if (err) return done(err);
       var count = createCount(10, done);
       eventStream.on('data', function (data) {
+
         var json = JSON.parse(data.toString());
         json.status.should.be.a.String;
         json.id.should.be.a.String;
@@ -406,6 +432,7 @@ describe('events', function () {
       });
     });
   });
+
 
 });
 

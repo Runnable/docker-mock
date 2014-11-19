@@ -39,6 +39,11 @@ docker.buildImage(
   });
 ```
 
+## Configuration
+
+If you want to disable randomly generated events exposed under `/events` endpoint please use ENV var: `DISABLE_RANDOM_EVENTS=true`.
+
+
 ## Contributing
 
 This is currently a work in progress, being built up as use cases come to light. If you would like to contribute, please note this repository is using a git-flow pattern, so please submit pull requests against the `develop` branch, and they will be merged into the future release branch and master.
