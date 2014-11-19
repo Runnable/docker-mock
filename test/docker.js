@@ -412,8 +412,67 @@ describe('events', function () {
         json.time.should.be.a.Number;
         if (i < 10) {
           count.next();
+        } else {
+          eventStream.destroy();
         }
         i++;
+      });
+    });
+
+  });
+
+
+  it('should emit create, start, kill, start, restart, stop real events', function (done) {
+    process.env.DISABLE_RANDOM_EVENTS = true;
+    var container;
+    var count = createCount(6, done);
+    docker.getEvents(function (err, eventStream) {
+      if (err) return done(err);
+      var i = 0;
+      eventStream.on('data', function (data) {
+        var json = JSON.parse(data.toString());
+        if (i === 0) {
+          json.status.should.equal('create');
+        }
+        if (i === 1) {
+          json.status.should.equal('start');
+        }
+        if (i === 2) {
+          json.status.should.equal('kill');
+        }
+        if (i === 3) {
+          json.status.should.equal('start');
+        }
+        if (i === 4) {
+          json.status.should.equal('restart');
+        }
+        if (i === 5) {
+          json.status.should.equal('stop');
+        }
+        json.status.should.be.a.String;
+        json.id.should.be.a.String;
+        json.from.should.be.a.String;
+        json.time.should.be.a.Number;
+        if (i < 6) {
+          count.next();
+        } else {
+          eventStream.destroy();
+        }
+        i++;
+      });
+    });
+    docker.createContainer({}, function (err, c) {
+      if (err) return done(err);
+      container = c;
+      async.series([
+        container.start.bind(container),
+        container.kill.bind(container),
+        container.start.bind(container),
+        container.restart.bind(container),
+        container.stop.bind(container),
+        container.remove.bind(container)
+      ], function (err, results) {
+        if (err) return done(err);
       });
     });
   });
@@ -421,26 +480,27 @@ describe('events', function () {
 
   it('should stream random generated events', function (done) {
     delete process.env.DISABLE_RANDOM_EVENTS;
+    var count = createCount(5, done);
     docker.getEvents(function (err, eventStream) {
       if (err) return done(err);
       var i = 0;
-      var count = createCount(10, done);
       eventStream.on('data', function (data) {
         var json = JSON.parse(data.toString());
         json.status.should.be.a.String;
         json.id.should.be.a.String;
         json.from.should.be.a.String;
         json.time.should.be.a.Number;
-        if (i < 10) {
+        if (i < 5) {
           count.next();
+        } else {
+          eventStream.destroy();
         }
         i++;
       });
     });
   });
-
-
 });
+
 
 describe('misc', function () {
   describe('/info', function () {
