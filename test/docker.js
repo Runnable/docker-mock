@@ -394,12 +394,15 @@ describe('events', function () {
 
   it('should stream emitted events', function (done) {
     process.env.DISABLE_RANDOM_EVENTS = true;
-    setInterval(function () {
+    var interval = setInterval(function () {
       dockerMock.events.stream.emit('data', dockerMock.events.generateEvent());
-    }, 100);
+    }, 10);
     docker.getEvents(function (err, eventStream) {
       if (err) return done(err);
-      var count = createCount(10, done);
+      var count = createCount(10, function () {
+        clearInterval(interval);
+        done();
+      });
       var i = 0;
       eventStream.on('data', function (data) {
         var json = JSON.parse(data.toString());
