@@ -1,0 +1,126 @@
+0 info it worked if it ends with ok
+1 verbose cli [ 'node', '/usr/local/bin/npm', 'publish' ]
+2 info using npm@2.1.7
+3 info using node@v0.10.28
+4 verbose publish [ '.' ]
+5 silly cache add args [ '.', null ]
+6 verbose cache add spec .
+7 silly cache add parsed spec { raw: '.',
+7 silly cache add   scope: null,
+7 silly cache add   name: null,
+7 silly cache add   rawSpec: '.',
+7 silly cache add   spec: '/workspace/docker-mock',
+7 silly cache add   type: 'directory' }
+8 verbose tar pack [ '/Users/casey/.npm/docker-mock/0.5.0/package.tgz',
+8 verbose tar pack   '/workspace/docker-mock' ]
+9 verbose tarball /Users/casey/.npm/docker-mock/0.5.0/package.tgz
+10 verbose folder /workspace/docker-mock
+11 info prepublish docker-mock@0.5.0
+12 verbose addLocalTarball adding from inside cache /Users/casey/.npm/docker-mock/0.5.0/package.tgz
+13 silly cache afterAdd docker-mock@0.5.0
+14 verbose afterAdd /Users/casey/.npm/docker-mock/0.5.0/package/package.json not in flight; writing
+15 verbose afterAdd /Users/casey/.npm/docker-mock/0.5.0/package/package.json written
+16 silly publish { name: 'docker-mock',
+16 silly publish   version: '0.5.0',
+16 silly publish   description: 'Mock for Docker',
+16 silly publish   main: 'lib/index.js',
+16 silly publish   bin: { 'docker-mock': './bin/cli.js' },
+16 silly publish   scripts:
+16 silly publish    { test: 'mocha --bail --require should --reporter spec',
+16 silly publish      coverage: 'mocha --bail --require blanket --require should --reporter html-cov > coverage.html',
+16 silly publish      travis: 'mocha --bail --require blanket --require should --reporter travis-cov',
+16 silly publish      'coverage-all': 'npm run coverage && npm run travis' },
+16 silly publish   config:
+16 silly publish    { blanket: { pattern: 'lib', 'data-cover-never': 'node_modules' },
+16 silly publish      'travis-cov': { threshold: 98 } },
+16 silly publish   keywords: [ 'docker', 'mock', 'testing' ],
+16 silly publish   author: { name: 'Bryan Kendall', email: 'bryan@bryankendall.com' },
+16 silly publish   repository: { type: 'git', url: 'https://github.com/Runnable/docker-mock' },
+16 silly publish   license: 'MIT',
+16 silly publish   dependencies:
+16 silly publish    { 'body-parser': '^1.9.0',
+16 silly publish      express: '^4.6.1',
+16 silly publish      lodash: '^2.4.1',
+16 silly publish      'middleware-flow': '^0.5.1',
+16 silly publish      tar: '^0.1.20',
+16 silly publish      minimist: '~1.1.0' },
+16 silly publish   devDependencies:
+16 silly publish    { JSONStream: '^0.9.0',
+16 silly publish      async: '~0.9.0',
+16 silly publish      blanket: '^1.1.6',
+16 silly publish      'callback-count': '^0.1.0',
+16 silly publish      'concat-stream': '^1.4.6',
+16 silly publish      dockerode: '~2.0.0',
+16 silly publish      mocha: '^1.18.2',
+16 silly publish      request: '^2.34.0',
+16 silly publish      should: '~4.0.4',
+16 silly publish      'tar-stream': '~0.4.2',
+16 silly publish      'travis-cov': '^0.2.5' },
+16 silly publish   gitHead: 'ed884dee7a7dc82e8c312ce787421b0f0fbf3700',
+16 silly publish   readme: '# docker-mock\n\n[![Build Status](https://travis-ci.org/Runnable/docker-mock.svg?branch=master)](https://travis-ci.org/Runnable/docker-mock) [![Dependency Status](https://david-dm.org/Runnable/docker-mock.svg)](https://david-dm.org/Runnable/docker-mock) [![devDependency Status](https://david-dm.org/Runnable/docker-mock/dev-status.svg)](https://david-dm.org/Runnable/docker-mock#info=devDependencies)\n\n[![NPM](https://nodei.co/npm/docker-mock.png?compact=true)](https://nodei.co/npm/docker-mock/)\n\nA mock for [Docker](http://docker.io)!\n\n## Usage\n\nRequire it from your node program:\n\n```javascript\nvar dockerMock = require(\'docker-mock\');\ndockerMock.listen(5354);\n```\n\nYou can also use the command line interface, just run `docker-mock` after installing the package globally.\n\n## Examples\n\nSee the tests for some sample usage, but you should be able to point your docker client at this mock and test against it.\n\n## Failures\n\nThis does have support for simulating failures during build. This is done (using `dockerode`) by doing the following:\n\n```javascript\n// file is a tar containing at minimum a Dockerfile\nvar file = ...;\ndocker.buildImage(\n  file,\n  {\n    t: \'doomedImage\',\n    fail: true\n  },\n  function (err, res) {\n    // err will not be null\n  });\n```\n\n## Contributing\n\nThis is currently a work in progress, being built up as use cases come to light. If you would like to contribute, please note this repository is using a git-flow pattern, so please submit pull requests against the `develop` branch, and they will be merged into the future release branch and master.\n\nPlease make sure all unit tests pass and coverage remains high during development (see below for details).\n\n### Testing\n\nTesting is done locally via `npm test`.\n\n### Coverage\n\nCoverage is done in two ways. First is a readable HTML report:\n\n`npm run coverage`\n\nSecond is coverage reported for Travis CI by `travis-cov`. This is invoked via:\n\n`npm run travis`\n\nIf you wish to run both to make sure they pass, you can run:\n\n`npm run coverage-all`\n',
+16 silly publish   readmeFilename: 'README.md',
+16 silly publish   bugs: { url: 'https://github.com/Runnable/docker-mock/issues' },
+16 silly publish   homepage: 'https://github.com/Runnable/docker-mock',
+16 silly publish   _id: 'docker-mock@0.5.0',
+16 silly publish   _shasum: '977c058aaff4302aea189b70429b44500ef387ef',
+16 silly publish   _from: '.' }
+17 silly mapToRegistry name docker-mock
+18 silly mapToRegistry using default registry
+19 silly mapToRegistry registry https://registry.npmjs.org/
+20 silly mapToRegistry uri https://registry.npmjs.org/docker-mock
+21 verbose publish registryBase https://registry.npmjs.org/
+22 silly publish uploading /Users/casey/.npm/docker-mock/0.5.0/package.tgz
+23 verbose request uri https://registry.npmjs.org/docker-mock
+24 verbose request sending authorization for write operation
+25 info attempt registry request try #1 at 16:49:51
+26 verbose request id ef3bd4bc14cc18c4
+27 http request PUT https://registry.npmjs.org/docker-mock
+28 http 403 https://registry.npmjs.org/docker-mock
+29 verbose headers { date: 'Tue, 18 Nov 2014 00:49:51 GMT',
+29 verbose headers   server: 'CouchDB/1.5.0 (Erlang OTP/R16B03)',
+29 verbose headers   'content-type': 'application/json',
+29 verbose headers   'cache-control': 'max-age=60',
+29 verbose headers   'content-length': '283',
+29 verbose headers   'accept-ranges': 'bytes',
+29 verbose headers   via: '1.1 varnish',
+29 verbose headers   'x-served-by': 'cache-lax1430-LAX',
+29 verbose headers   'x-cache': 'MISS',
+29 verbose headers   'x-cache-hits': '0',
+29 verbose headers   'x-timer': 'S1416271791.431047,VS0,VE84',
+29 verbose headers   'keep-alive': 'timeout=10, max=50',
+29 verbose headers   connection: 'Keep-Alive' }
+30 verbose request invalidating /Users/casey/.npm/registry.npmjs.org/docker-mock on PUT
+31 error publish Failed PUT 403
+32 verbose stack Error: forbidden user: cflynn07 not authorized to modify docker-mock
+32 verbose stack Changed: dist-tags.latest "0.4.0" -> "0.5.0"
+32 verbose stack Added: versions.0.5.0
+32 verbose stack Changed: time.modified "2014-11-17T22:04:52.226Z" -> "2014-11-18T00:50:18.505Z"
+32 verbose stack Added: time.0.5.0
+32 verbose stack Added: _attachments: docker-mock
+32 verbose stack     at CachingRegistryClient.<anonymous> (/usr/local/lib/node_modules/npm/node_modules/npm-registry-client/lib/request.js:234:14)
+32 verbose stack     at Request._callback (/usr/local/lib/node_modules/npm/node_modules/npm-registry-client/lib/request.js:172:14)
+32 verbose stack     at Request.self.callback (/usr/local/lib/node_modules/npm/node_modules/request/request.js:372:22)
+32 verbose stack     at Request.EventEmitter.emit (events.js:98:17)
+32 verbose stack     at Request.<anonymous> (/usr/local/lib/node_modules/npm/node_modules/request/request.js:1310:14)
+32 verbose stack     at Request.EventEmitter.emit (events.js:117:20)
+32 verbose stack     at IncomingMessage.<anonymous> (/usr/local/lib/node_modules/npm/node_modules/request/request.js:1258:12)
+32 verbose stack     at IncomingMessage.EventEmitter.emit (events.js:117:20)
+32 verbose stack     at _stream_readable.js:919:16
+32 verbose stack     at process._tickCallback (node.js:419:13)
+33 verbose statusCode 403
+34 verbose pkgid docker-mock
+35 verbose cwd /workspace/docker-mock
+36 error Darwin 14.0.0
+37 error argv "node" "/usr/local/bin/npm" "publish"
+38 error node v0.10.28
+39 error npm  v2.1.7
+40 error code E403
+41 error forbidden user: cflynn07 not authorized to modify docker-mock
+41 error Changed: dist-tags.latest "0.4.0" -> "0.5.0"
+41 error Added: versions.0.5.0
+41 error Changed: time.modified "2014-11-17T22:04:52.226Z" -> "2014-11-18T00:50:18.505Z"
+41 error Added: time.0.5.0
+41 error Added: _attachments: docker-mock
+42 error If you need help, you may report this error at:
+42 error     <http://github.com/npm/npm/issues>
+43 verbose exit [ 1, true ]
