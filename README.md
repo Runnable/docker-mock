@@ -50,9 +50,11 @@ If you want to disable randomly generated events exposed under `/events` endpoin
 You can manually emit docker mock events.
 
 ```javascript
-  docker.events.stream.emit('data', JSON.stringify({status: 'die', from: '..', id: '...', time: '...'}));
+  var dockerMock = require('docker-mock');
+  dockerMock.listen(5354);
+  dockerMock.events.stream.emit('data', JSON.stringify({status: 'die', from: '..', id: '...', time: '...'}));
   // or
-  docker.events.stream.emit('data', docker.events.generateEvent());
+  dockerMock.events.stream.emit('data', dockerMock.events.generateEvent());
 
 ```
 
