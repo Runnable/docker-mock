@@ -420,15 +420,18 @@ describe('events', function () {
     delete process.env.DISABLE_RANDOM_EVENTS;
     docker.getEvents(function (err, eventStream) {
       if (err) return done(err);
+      var i = 0;
       var count = createCount(10, done);
       eventStream.on('data', function (data) {
-
         var json = JSON.parse(data.toString());
         json.status.should.be.a.String;
         json.id.should.be.a.String;
         json.from.should.be.a.String;
         json.time.should.be.a.Number;
-        count.next();
+        if (i < 10) {
+          count.next();
+        }
+        i++;
       });
     });
   });
