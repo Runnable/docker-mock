@@ -39,6 +39,25 @@ docker.buildImage(
   });
 ```
 
+
+## Configuration
+
+If you want to disable randomly generated events exposed under `/events` endpoint please use ENV var: `DISABLE_RANDOM_EVENTS=true`.
+
+
+## Events
+
+You can manually emit docker mock events.
+
+```javascript
+  var dockerMock = require('docker-mock');
+  dockerMock.listen(5354);
+  dockerMock.events.stream.emit('data', JSON.stringify({status: 'die', from: '..', id: '...', time: '...'}));
+  // or
+  dockerMock.events.stream.emit('data', dockerMock.events.generateEvent());
+
+```
+
 ## Contributing
 
 This is currently a work in progress, being built up as use cases come to light. If you would like to contribute, please note this repository is using a git-flow pattern, so please submit pull requests against the `develop` branch, and they will be merged into the future release branch and master.
