@@ -297,6 +297,14 @@ describe('images', function () {
       done();
     });
   });
+   it('should pull image', function (done) {
+    docker.pull('my/repo:tag', function (err, stream) {
+      if (err) return done(err);
+      stream.on('data', function(data) {
+        done();
+      });
+    });
+  });
   describe('interactions', function () {
     beforeEach(function (done) {
       var pack = tar.pack();
