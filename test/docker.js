@@ -298,11 +298,22 @@ describe('images', function () {
     });
   });
   describe('image pulling', function () {
-    afterEach(function(done) {
-      docker.getImage('my/repo:tag').remove(done);
-    });
     it('should pull image', function (done) {
-      docker.pull('my/repo:tag', handleStream(done));
+      docker.pull('my/repo:tag', handleStream(function(err) {
+        if (err) { return done(err); }
+        docker.getImage('my/repo:tag').remove(done);
+      }));
+    });
+    it('should error if invalid image', function (done) {
+      docker.pull('', function(err, stream) {
+        stream.on('data', function(data) {
+          data = JSON.parse(data);
+          if (data[0] && data[0].error && data[0].errorDetail) {
+            done();
+          }
+        });
+        stream.on('end', function() { console.log('end'); });
+      });
     });
   });
   describe('interactions', function () {
