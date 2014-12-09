@@ -47,6 +47,7 @@
     "callback-count": "^0.1.0",
     "concat-stream": "^1.4.6",
     "dockerode": "~2.0.0",
+    "duplex-emitter": "^2.1.2",
     "mocha": "^1.18.2",
     "request": "^2.34.0",
     "should": "~4.0.4",

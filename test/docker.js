@@ -297,12 +297,12 @@ describe('images', function () {
       done();
     });
   });
-   it('should pull image', function (done) {
-    docker.pull('my/repo:tag', function (err, stream) {
-      if (err) return done(err);
-      stream.on('data', function(data) {
-        done();
-      });
+  describe('image pulling', function () {
+    afterEach(function(done) {
+      docker.getImage('my/repo:tag').remove(done);
+    });
+    it('should pull image', function (done) {
+      docker.pull('my/repo:tag', handleStream(done));
     });
   });
   describe('interactions', function () {
@@ -329,11 +329,11 @@ describe('images', function () {
     });
     it('should push an image', function (done) {
       docker.getImage('testImage')
-        .push({}, handlePushStream(done));
+        .push({}, handleStream(done));
     });
     it('should not push an image if it doesnt exist', function (done) {
       docker.getImage('nonexistantImage')
-        .push({}, handlePushStream(function (err) {
+        .push({}, handleStream(function (err) {
           err.statusCode.should.equal(404);
           done();
         }));
@@ -354,11 +354,11 @@ describe('images', function () {
       });
       it('should push a private image', function (done) {
         docker.getImage(this.repo)
-          .push({}, handlePushStream(done));
+          .push({}, handleStream(done));
       });
       it('should not push a private image if it doesnt exist', function (done) {
         docker.getImage('private.com/hey/nonexistantImage')
-          .push({}, handlePushStream(function (err) {
+          .push({}, handleStream(function (err) {
             err.statusCode.should.equal(404);
             done();
           }));
@@ -599,7 +599,7 @@ function watchBuildFail(cb) {
   };
 }
 
-function handlePushStream (cb) {
+function handleStream (cb) {
   return function (err, res) {
     if (err) {
       cb(err);
