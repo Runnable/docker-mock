@@ -297,6 +297,25 @@ describe('images', function () {
       done();
     });
   });
+  describe('image pulling', function () {
+    it('should pull image', function (done) {
+      docker.pull('my/repo:tag', handleStream(function(err) {
+        if (err) { return done(err); }
+        docker.getImage('my/repo:tag').remove(done);
+      }));
+    });
+    it('should error if invalid image', function (done) {
+      docker.pull('', function(err, stream) {
+        stream.on('data', function(data) {
+          data = JSON.parse(data);
+          if (data[0] && data[0].error && data[0].errorDetail) {
+            done();
+          }
+        });
+        stream.on('end', function() { console.log('end'); });
+      });
+    });
+  });
   describe('interactions', function () {
     beforeEach(function (done) {
       var pack = tar.pack();
@@ -321,11 +340,11 @@ describe('images', function () {
     });
     it('should push an image', function (done) {
       docker.getImage('testImage')
-        .push({}, handlePushStream(done));
+        .push({}, handleStream(done));
     });
     it('should not push an image if it doesnt exist', function (done) {
       docker.getImage('nonexistantImage')
-        .push({}, handlePushStream(function (err) {
+        .push({}, handleStream(function (err) {
           err.statusCode.should.equal(404);
           done();
         }));
@@ -346,11 +365,11 @@ describe('images', function () {
       });
       it('should push a private image', function (done) {
         docker.getImage(this.repo)
-          .push({}, handlePushStream(done));
+          .push({}, handleStream(done));
       });
       it('should not push a private image if it doesnt exist', function (done) {
         docker.getImage('private.com/hey/nonexistantImage')
-          .push({}, handlePushStream(function (err) {
+          .push({}, handleStream(function (err) {
             err.statusCode.should.equal(404);
             done();
           }));
@@ -603,7 +622,7 @@ function watchBuildFail(cb) {
   };
 }
 
-function handlePushStream (cb) {
+function handleStream (cb) {
   return function (err, res) {
     if (err) {
       cb(err);
