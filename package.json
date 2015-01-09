@@ -33,25 +33,25 @@
   },
   "license": "MIT",
   "dependencies": {
-    "body-parser": "^1.9.0",
+    "body-parser": "^1.10.1",
     "duplex-emitter": "^2.1.2",
     "express": "^4.6.1",
     "lodash": "^2.4.1",
-    "middleware-flow": "^0.5.1",
-    "minimist": "~1.1.0",
-    "tar": "^0.1.20"
+    "middleware-flow": "^0.6.1",
+    "minimist": "^1.1.0",
+    "tar": "^1.0.3"
   },
   "devDependencies": {
-    "JSONStream": "^0.9.0",
+    "JSONStream": "^0.10.0",
     "async": "~0.9.0",
     "blanket": "^1.1.6",
     "callback-count": "^0.1.0",
-    "concat-stream": "^1.4.6",
-    "dockerode": "~2.0.0",
-    "mocha": "^1.18.2",
-    "request": "^2.34.0",
-    "should": "~4.0.4",
-    "tar-stream": "~0.4.2",
+    "concat-stream": "^1.4.7",
+    "dockerode": "^2.0.6",
+    "mocha": "^2.1.0",
+    "request": "^2.51.0",
+    "should": "^4.4.4",
+    "tar-stream": "^1.1.2",
     "travis-cov": "^0.2.5"
   }
 }
