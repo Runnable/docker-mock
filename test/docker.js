@@ -312,7 +312,7 @@ describe('images', function () {
             done();
           }
         });
-        stream.on('end', function() { console.log('end'); });
+        stream.on('end', function() {});
       });
     });
   });
