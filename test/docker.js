@@ -342,6 +342,22 @@ describe('images', function () {
       docker.getImage('testImage')
         .push({}, handleStream(done));
     });
+    it('should get an images history', function (done) {
+      docker.getImage('testImage')
+        .history(function (err, history) {
+          if (err) { return done(err); }
+          history.length.should.equal(1);
+          done();
+        });
+    });
+    it('should 404 an image that does not exist', function (done) {
+      docker.getImage('nopeImage')
+        .history(function (err, history) {
+          if (!err) { return cb(new Error('expected an error')); }
+          err.statusCode.should.equal(404);
+          done();
+        });
+    });
     it('should not push an image if it doesnt exist', function (done) {
       docker.getImage('nonexistantImage')
         .push({}, handleStream(function (err) {
@@ -392,7 +408,7 @@ describe('events', function () {
         json.from.should.be.a.String;
         json.time.should.be.a.Number;
         count.next();
-      })
+      });
     });
   });
 
@@ -407,7 +423,7 @@ describe('events', function () {
         json.from.should.be.a.String;
         json.time.should.be.a.Number;
         count.next();
-      })
+      });
     });
   });
 
