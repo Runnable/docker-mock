@@ -6,6 +6,7 @@ var zlib = require('zlib');
 var concat = require('concat-stream');
 var createCount = require('callback-count');
 var JSONStream = require('JSONStream');
+var eventsStream = require('../lib/middleware').eventsStream;
 var noop = function () {};
 dockerMock.listen(5354);
 
@@ -16,7 +17,9 @@ describe('containers', function () {
     async.waterfall([
       docker.createContainer.bind(docker, {}),
       function (container, cb) {
-        container.remove(cb);
+        var count = createCount(cb);
+        eventsStream.on('data', expectStatus('destroy', count.inc().next));
+        container.remove(count.inc().next);
       }
     ], done);
   });
@@ -460,7 +463,8 @@ describe('events', function () {
   it('should emit create, start, kill, start, restart, stop real events', function (done) {
     process.env.DISABLE_RANDOM_EVENTS = true;
     var container;
-    var count = createCount(10, done);
+    var numEvents = 11;
+    var count = createCount(numEvents, done);
     docker.getEvents(function (err, eventStream) {
       if (err) return done(err);
       var i = 0;
@@ -496,11 +500,14 @@ describe('events', function () {
         if (i === 9) {
           json.status.should.equal('stop');
         }
+        if (i === 10) {
+          json.status.should.equal('destroy');
+        }
         json.status.should.be.a.String;
         json.id.should.be.a.String;
         json.from.should.be.a.String;
         json.time.should.be.a.Number;
-        if (i < 10) {
+        if (i < numEvents) {
           count.next();
         } else {
           eventStream.destroy();
@@ -655,6 +662,16 @@ function handleStream (cb) {
           cb();
         }
       });
+    }
+  };
+}
+
+function expectStatus (status, cb) {
+  return function handler (data) {
+    var json = JSON.parse(data);
+    if (json.status === status) {
+      eventsStream.removeListener('data', handler);
+      cb();
     }
   };
 }
