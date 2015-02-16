@@ -6,6 +6,7 @@ var zlib = require('zlib');
 var concat = require('concat-stream');
 var createCount = require('callback-count');
 var JSONStream = require('JSONStream');
+var eventsStream = require('../lib/middleware').eventsStream;
 var noop = function () {};
 dockerMock.listen(5354);
 
@@ -16,7 +17,9 @@ describe('containers', function () {
     async.waterfall([
       docker.createContainer.bind(docker, {}),
       function (container, cb) {
-        container.remove(cb);
+        var count = createCount(cb);
+        eventsStream.on('data', expectStatus('destroy', count.inc().next));
+        container.remove(count.inc().next);
       }
     ], done);
   });
@@ -655,6 +658,16 @@ function handleStream (cb) {
           cb();
         }
       });
+    }
+  };
+}
+
+function expectStatus (status, cb) {
+  return function handler (data) {
+    var json = JSON.parse(data);
+    if (json.status === status) {
+      eventsStream.removeListener('data', handler);
+      cb();
     }
   };
 }
