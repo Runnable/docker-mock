@@ -70,14 +70,4 @@ Testing is done locally via `npm test`.
 
 ### Coverage
 
-Coverage is done in two ways. First is a readable HTML report:
-
-`npm run coverage`
-
-Second is coverage reported for Travis CI by `travis-cov`. This is invoked via:
-
-`npm run travis`
-
-If you wish to run both to make sure they pass, you can run:
-
-`npm run coverage-all`
+Coverage is now run by Lab via `npm test`. Output at the bottom shows percent coverage verses a threshold set in `package.json`.
