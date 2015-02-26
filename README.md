@@ -11,6 +11,7 @@ A mock for [Docker](http://docker.io)!
 
 Require it from your node program:
 
+ss
 ```javascript
 var dockerMock = require('docker-mock');
 dockerMock.listen(5354);
