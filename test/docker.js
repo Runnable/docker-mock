@@ -1,28 +1,39 @@
 'use strict';
 
-var dockerMock = require('../lib/index');
+var JSONStream = require('JSONStream');
 var async = require('async');
+var concat = require('concat-stream');
+var createCount = require('callback-count');
+var dockerMock = require('../lib/index');
+var eventsStream = require('../lib/middleware').eventsStream;
+var noop = require('101/noop');
 var request = require('request');
 var tar = require('tar-stream');
 var zlib = require('zlib');
-var concat = require('concat-stream');
-var createCount = require('callback-count');
-var JSONStream = require('JSONStream');
-var eventsStream = require('../lib/middleware').eventsStream;
 
-var Code = require('code');
 var Lab = require('lab');
 var lab = exports.lab = Lab.script();
-var describe = lab.describe;
-var it = lab.it;
-var beforeEach = lab.beforeEach;
+
+var after = lab.after;
 var afterEach = lab.afterEach;
-var expect = Code.expect;
+var before = lab.before;
+var beforeEach = lab.beforeEach;
+var describe = lab.describe;
+var expect = require('code').expect;
+var it = lab.it;
 
-var noop = function () {};
-dockerMock.listen(5354);
+var server;
+before(function (done) {
+  server = dockerMock.listen(5354, done);
+});
+after(function (done) {
+  server.close(done);
+});
 
-var docker = require('dockerode')({host: 'http://localhost', port: 5354});
+var docker = require('dockerode')({
+  host: 'http://localhost',
+  port: 5354
+});
 
 describe('containers', function () {
   it('should create and delete a container', function (done) {
@@ -37,7 +48,7 @@ describe('containers', function () {
   });
   it('should create a container with env in the body', function (done) {
     var createData = {
-      Env: [ 'MY_AWESOME_ENV_VARIABLE=inconceivable' ]
+      Env: ['MY_AWESOME_ENV_VARIABLE=inconceivable']
     };
     async.waterfall([
       docker.createContainer.bind(docker, createData),
@@ -45,7 +56,7 @@ describe('containers', function () {
         container.inspect(cb);
       }
     ], function (err, containerData) {
-      if (err) return done(err);
+      if (err) { return done(err); }
       expect(containerData.Env).to.be.an.array();
       expect(containerData.Env).to.have.length(1);
       expect(containerData.Env[0]).to.equal(createData.Env[0]);
@@ -54,7 +65,7 @@ describe('containers', function () {
   });
   it('should list all the containers when there are none', function (done) {
     docker.listContainers(function (err, containers) {
-      if (err) return done(err);
+      if (err) { return done(err); }
       expect(containers.length).to.equal(0);
       done();
     });
@@ -63,7 +74,7 @@ describe('containers', function () {
     var container;
     beforeEach(function (done) {
       docker.createContainer({}, function (err, c) {
-        if (err) return done(err);
+        if (err) { return done(err); }
         container = c;
         done();
       });
@@ -74,7 +85,7 @@ describe('containers', function () {
 
     it('should list all the containers', function (done) {
       docker.listContainers(function (err, containers) {
-        if (err) return done(err);
+        if (err) { return done(err); }
         expect(containers.length).to.equal(1);
         expect(containers[0].Id).to.equal(container.id);
         done();
@@ -82,22 +93,25 @@ describe('containers', function () {
     });
     it('should give us information about it', function (done) {
       container.inspect(function (err, data) {
-        if (err) return done(err);
+        if (err) { return done(err); }
         expect(data.Id).to.equal(container.id);
         done();
       });
     });
     it('should attach to the container', function (done) {
       container.attach({}, function (err, stream) {
-        if (err) return done(err);
-        stream.on('data', function () {});
+        if (err) { return done(err); }
+        stream.on('data', noop);
         stream.on('end', function () { done(); });
       });
     });
     it('should error on an unknown container', function (done) {
       docker.getContainer('nope').inspect(function (err) {
-        if (err) done();
-        else done('should have return a 404');
+        if (err) {
+          done();
+        } else {
+          done('should have return a 404');
+        }
       });
     });
     it('should be able to commit a container to an image', function (done) {
@@ -110,7 +124,7 @@ describe('containers', function () {
         function (imageData, cb) {
           var image = docker.getImage('committedContainer');
           image.inspect(function (err, data) {
-            if (err) return cb(err);
+            if (err) { return cb(err); }
             expect(data.id).to.contain(imageData.Id);
             cb(null, image);
           });
@@ -121,28 +135,30 @@ describe('containers', function () {
       ], done);
     });
     it('should be able to start it', function (done) {
-      container.start(function (err) {
-        if (err) return done(err);
-        container.inspect(function (err, data) {
-          if (err) return done(err);
-          expect(data.State.Running).to.be.true();
-          expect(data.State.Pid).to.be.a.number();
-          done();
-        });
+      async.series([
+        container.start.bind(container),
+        container.inspect.bind(container)
+      ], function (err, data) {
+        if (err) { return done(err); }
+        data = data[1]; // get the inspect data
+        expect(data.State.Running).to.be.true();
+        expect(data.State.Pid).to.be.a.number();
+        done();
       });
     });
     it('should be able to get the logs', function (done) {
-      container.start(function (err) {
-        if (err) return done(err);
-        container.logs({}, function (err, logs) {
-          if (err) return done(err);
-          var count = createCount(2, done);
-          logs.pipe(concat(function (data) {
-            expect(data.toString()).to.equal('Just a bunch of text');
-            count.next();
-          }));
-          logs.on('end', function () { count.next(); });
-        });
+      async.series([
+        container.start.bind(container),
+        container.logs.bind(container, {})
+      ], function (err, data) {
+        if (err) { return done(err); }
+        var logs = data[1];
+        var count = createCount(2, done);
+        logs.pipe(concat(function (logBuffer) {
+          expect(logBuffer.toString()).to.equal('Just a bunch of text');
+          count.next();
+        }));
+        logs.on('end', function () { count.next(); });
       });
     });
     it('should should not start twice', function (done) {
@@ -156,10 +172,10 @@ describe('containers', function () {
           });
         },
         container.start.bind(container)
-      ], function (err) {
-        if (!err) return done('should not have started second time');
+      ], function (seriesErr) {
+        if (!seriesErr) { return done('should not have started second time'); }
         container.inspect(function (err, data) {
-          if (err) return done(err);
+          if (err) { return done(err); }
           expect(data).to.deep.equal(originalInspect);
           done();
         });
@@ -168,41 +184,39 @@ describe('containers', function () {
     it('should be able to stop it', function (done) {
       async.series([
         container.start.bind(container),
-        container.stop.bind(container)
-      ], function (err) {
-        if (err) return done(err);
-        container.inspect(function (err, data) {
-          if (err) return done(err);
-          expect(data.State.Running).to.be.false();
-          expect(data.State.Pid).to.equal(0);
-          done();
-        });
+        container.stop.bind(container),
+        container.inspect.bind(container)
+      ], function (err, data) {
+        if (err) { return done(err); }
+        data = data[2];
+        expect(data.State.Running).to.be.false();
+        expect(data.State.Pid).to.equal(0);
+        done();
       });
     });
     it('should be able to stop and wait for it to stop', function (done) {
       async.series([
         container.start.bind(container),
-        container.wait.bind(container)
-      ], function (err) {
-        if (err) return done(err);
-        container.inspect(function (err, data) {
-          if (err) return done(err);
-          expect(data.State.Running).to.be.false();
-          expect(data.State.Pid).to.equal(0);
-          done();
-        });
+        container.wait.bind(container),
+        container.inspect.bind(container)
+      ], function (err, data) {
+        if (err) { return done(err); }
+        data = data[2];
+        expect(data.State.Running).to.be.false();
+        expect(data.State.Pid).to.equal(0);
+        done();
       });
     });
     it('should come back with an error if stopped twice', function (done) {
       async.series([
         container.start.bind(container),
         container.stop.bind(container)
-      ], function (err) {
-        if (err) return done(err);
-        container.stop(function (err) {
-          expect(err.statusCode).to.equal(304);
+      ], function (seriesErr) {
+        if (seriesErr) { return done(seriesErr); }
+        container.stop(function (stopErr) {
+          expect(stopErr.statusCode).to.equal(304);
           container.inspect(function (err, data) {
-            if (err) return done(err);
+            if (err) { return done(err); }
             expect(data.State.Running).to.be.false();
             expect(data.State.Pid).to.equal(0);
             done();
@@ -214,10 +228,10 @@ describe('containers', function () {
       async.series([
         container.start.bind(container),
         container.kill.bind(container)
-      ], function (err) {
-        if (err) return done(err);
+      ], function (seriesErr) {
+        if (seriesErr) { return done(seriesErr); }
         container.inspect(function (err, data) {
-          if (err) return done(err);
+          if (err) { return done(err); }
           expect(data.State.Running).to.be.false();
           done();
         });
@@ -227,10 +241,10 @@ describe('containers', function () {
       async.series([
         container.start.bind(container),
         container.restart.bind(container)
-      ], function (err) {
-        if (err) return done(err);
+      ], function (seriesErr) {
+        if (seriesErr) { return done(seriesErr); }
         container.inspect(function (err, data) {
-          if (err) return done(err);
+          if (err) { return done(err); }
           // FIXME: these test are broken. this does not return true
           expect(data.State.Running).to.be.true();
           done();
@@ -317,39 +331,40 @@ describe('images', function () {
       qs: { 't': 'buildTest' },
       headers: { 'content-type': 'application/x-gzip' }
     })).on('end', function (err) {
-      if (err) return done(err);
+      if (err) { return done(err); }
       image.remove(done);
     });
   });
   it('should list all the images when there are none', function (done) {
     docker.listImages({}, function (err, images) {
-      if (err) return done(err);
+      if (err) { return done(err); }
       expect(images).to.have.length(0);
       done();
     });
   });
   describe('image pulling', function () {
     it('should pull image', function (done) {
-      docker.pull('my/repo:tag', handleStream(function(err) {
+      docker.pull('my/repo:tag', handleStream(function (err) {
         if (err) { return done(err); }
         docker.getImage('my/repo:tag').remove(done);
       }));
     });
     it('should pull image without a tag', function (done) {
-      docker.pull('my/repo', handleStream(function(err) {
+      docker.pull('my/repo', handleStream(function (err) {
         if (err) { return done(err); }
         docker.getImage('my/repo').remove(done);
       }));
     });
     it('should error if invalid image', function (done) {
-      docker.pull('', function(err, stream) {
-        stream.on('data', function(data) {
+      docker.pull('', function (err, stream) {
+        if (err) { return done(err); }
+        stream.on('data', function (data) {
           data = JSON.parse(data);
           if (data[0] && data[0].error && data[0].errorDetail) {
             done();
           }
         });
-        stream.on('end', function() {});
+        stream.on('end', noop);
       });
     });
   });
@@ -386,7 +401,7 @@ describe('images', function () {
     });
     it('should list all the images', function (done) {
       docker.listImages(function (err, images) {
-        if (err) return done(err);
+        if (err) { return done(err); }
         expect(images).to.have.length(2);
         expect(images[0].RepoTags).to.have.length(1);
         expect(images[0].RepoTags[0]).to.equal('testImage:latest');
@@ -424,7 +439,7 @@ describe('images', function () {
           done();
         }));
     });
-    describe('private', function() {
+    describe('private', function () {
       var repo;
       beforeEach(function (done) {
         var pack = tar.pack();
@@ -456,13 +471,11 @@ describe('images', function () {
 });
 
 describe('events', function () {
-
-
   it('should return one time result when since is provided', function (done) {
     docker.getEvents(
       { since: new Date().getTime() },
       function (err, eventStream) {
-        if (err) return done(err);
+        if (err) { return done(err); }
         var count = createCount(100, done);
         eventStream.pipe(JSONStream.parse()).on('data', function (json) {
           expect(json.status).to.be.a.string();
@@ -479,7 +492,7 @@ describe('events', function () {
     docker.getEvents(
       { until: new Date().getTime() },
       function (err, eventStream) {
-        if (err) return done(err);
+        if (err) { return done(err); }
         var count = createCount(100, done);
         eventStream.pipe(JSONStream.parse()).on('data', function (json) {
           expect(json.status).to.be.a.string();
@@ -498,7 +511,7 @@ describe('events', function () {
       dockerMock.events.stream.emit('data', dockerMock.events.generateEvent());
     }, 10);
     docker.getEvents(function (err, eventStream) {
-      if (err) return done(err);
+      if (err) { return done(err); }
       var count = createCount(10, function () {
         clearInterval(interval);
         done();
@@ -518,7 +531,6 @@ describe('events', function () {
         i++;
       });
     });
-
   });
 
   it('should emit create, start, kill, start, restart, stop real events',
@@ -528,7 +540,7 @@ describe('events', function () {
       var numEvents = 11;
       var count = createCount(numEvents, done);
       docker.getEvents(function (err, eventStream) {
-        if (err) return done(err);
+        if (err) { return done(err); }
         var i = 0;
         eventStream.on('data', function (data) {
           var json = JSON.parse(data.toString());
@@ -576,30 +588,29 @@ describe('events', function () {
           }
           i++;
         });
-      }
-    );
-    docker.createContainer({}, function (err, c) {
-      if (err) return done(err);
-      container = c;
-      async.series([
-        container.start.bind(container),
-        container.kill.bind(container),
-        container.start.bind(container),
-        container.restart.bind(container),
-        container.stop.bind(container),
-        container.remove.bind(container)
-      ], function (err) {
-        if (err) return done(err);
       });
-    });
-  });
-
+      docker.createContainer({}, function (err, c) {
+        if (err) { return done(err); }
+        container = c;
+        async.series([
+          container.start.bind(container),
+          container.kill.bind(container),
+          container.start.bind(container),
+          container.restart.bind(container),
+          container.stop.bind(container),
+          container.remove.bind(container)
+        ], function (seriesErr) {
+          if (seriesErr) { return done(seriesErr); }
+        });
+      });
+    }
+  );
 
   it('should stream random generated events', function (done) {
     delete process.env.DISABLE_RANDOM_EVENTS;
     var count = createCount(5, done);
     docker.getEvents(function (err, eventStream) {
-      if (err) return done(err);
+      if (err) { return done(err); }
       var i = 0;
       eventStream.on('data', function (data) {
         var json = JSON.parse(data.toString());
@@ -635,9 +646,13 @@ describe('misc', function () {
 describe('invalid endpoints', function () {
   it('should respond with an error', function (done) {
     request.get('http://localhost:5354/_nope', function (err, res) {
-      if (err && res.statusCode === 501) done(err);
-      else if (res.statusCode !== 501) done('should have sent a 501 error');
-      else done();
+      if (err && res.statusCode === 501) {
+        done(err);
+      } else if (res.statusCode !== 501) {
+        done('should have sent a 501 error');
+      } else {
+        done();
+      }
     });
   });
 });
@@ -660,9 +675,9 @@ function checkClean (cb) {
 function checkImages (cb) {
   async.waterfall([
     docker.listImages.bind(docker, {}),
-    function (images, cb) {
+    function (images, _cb) {
       expect(images.length).to.equal(0);
-      cb();
+      _cb();
     }
   ], cb);
 }
@@ -670,9 +685,9 @@ function checkImages (cb) {
 function checkContainers (cb) {
   async.waterfall([
     docker.listContainers.bind(docker),
-    function (containers, cb) {
+    function (containers, _cb) {
       expect(containers.length).to.equal(0);
-      cb();
+      _cb();
     }
   ], cb);
 }
@@ -680,43 +695,48 @@ function checkContainers (cb) {
 function checkInfo (cb) {
   async.waterfall([
     docker.info.bind(docker),
-    function (data, cb) {
+    function (data, _cb) {
       expect(data.Containers).to.equal(0);
       expect(data.Images).to.equal(0);
       expect(data.Mock).to.be.true();
-      cb();
+      _cb();
     }
   ], cb);
 }
 
-function watchBuild(removeImage, cb) {
+function watchBuild (removeImage, cb) {
   if (typeof removeImage === 'function') {
     cb = removeImage;
     removeImage = false;
   }
   return function (err, res) {
-    if (err) return cb(err);
-    res.on('data', function () {});
+    if (err) { return cb(err); }
+    res.on('data', noop);
     res.on('end', function () {
-      if (removeImage) removeImage.remove(cb);
-      else cb();
+      if (removeImage) {
+        removeImage.remove(cb);
+      } else {
+        cb();
+      }
     });
   };
 }
 
-function watchBuildFail(cb) {
+function watchBuildFail (cb) {
   return function (err) {
-    if (err && err.statusCode === 500) cb();
-    else cb('expected to fail');
+    if (err && err.statusCode === 500) {
+      cb();
+    } else {
+      cb('expected to fail');
+    }
   };
 }
 
 function handleStream (cb) {
-  return function (err, res) {
-    if (err) {
-      cb(err);
-    }
-    else {
+  return function (funcErr, res) {
+    if (funcErr) {
+      cb(funcErr);
+    } else {
       var errorred = false;
       res.on('error', function (err) {
         errorred = err;
