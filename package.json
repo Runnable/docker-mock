@@ -7,7 +7,7 @@
     "docker-mock": "./bin/cli.js"
   },
   "scripts": {
-    "coverage": "lab --reporter lcov > codeclimate",
+    "coverage": "lab --reporter lcov --output lcov.info",
     "test": "lab --verbose --coverage --threshold 95",
     "lint": "eslint ."
   },
