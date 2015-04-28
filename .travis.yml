@@ -4,6 +4,10 @@ node_js:
   - "0.12"
   - "iojs"
 sudo: false
+before_script:
+  - npm install -g codeclimate-test-reporter
 script:
   - npm run lint
   - npm test
+after_script:
+  - npm run coverage
