@@ -89,8 +89,10 @@ describe('containers', function () {
     afterEach(function (done) {
       container.remove(done);
     });
-    it('should save Labels on create and respond with Labels on inspect', function (done) {
+    it('should save Labels on create and respond with Labels on inspect',
+    function (done) {
       container.inspect(function (err, data) {
+        if (err) { return done(err); }
         expect(data.Labels).to.deep.contain(Labels);
         done();
       });
