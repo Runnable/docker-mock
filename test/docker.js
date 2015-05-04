@@ -93,7 +93,7 @@ describe('containers', function () {
     function (done) {
       container.inspect(function (err, data) {
         if (err) { return done(err); }
-        expect(data.Labels).to.deep.contain(Labels);
+        expect(data.Config.Labels).to.deep.contain(Labels);
         done();
       });
     });
