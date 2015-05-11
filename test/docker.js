@@ -70,6 +70,34 @@ describe('containers', function () {
       done();
     });
   });
+  describe('labels', function () {
+    var container;
+    var Labels = {
+      type: 'user-container',
+      ultimateQuestion: 'batmanvssuperman',
+      obviousAnswer: 'superman'
+    };
+    beforeEach(function (done) {
+      docker.createContainer({
+        Labels: Labels
+      }, function (err, c) {
+        if (err) { return done(err); }
+        container = c;
+        done();
+      });
+    });
+    afterEach(function (done) {
+      container.remove(done);
+    });
+    it('should save Labels on create and respond with Labels on inspect',
+    function (done) {
+      container.inspect(function (err, data) {
+        if (err) { return done(err); }
+        expect(data.Config.Labels).to.deep.contain(Labels);
+        done();
+      });
+    });
+  });
   describe('interactions', function () {
     var container;
     beforeEach(function (done) {
