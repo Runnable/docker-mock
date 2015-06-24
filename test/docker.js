@@ -433,6 +433,7 @@ describe('images', function () {
         expect(images).to.have.length(2);
         expect(images[0].RepoTags).to.have.length(1);
         expect(images[0].RepoTags[0]).to.equal('testImage:latest');
+        expect(images[0].Created).to.be.a.number();
         done();
       });
     });
