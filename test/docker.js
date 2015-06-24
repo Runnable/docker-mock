@@ -434,6 +434,7 @@ describe('images', function () {
         expect(images[0].RepoTags).to.have.length(1);
         expect(images[0].RepoTags[0]).to.equal('testImage:latest');
         expect(images[0].Created).to.be.a.number();
+        expect(images[0].Created).to.be.about(new Date() / 1000 | 0, 10);
         done();
       });
     });
