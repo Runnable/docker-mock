@@ -283,6 +283,46 @@ describe('containers', function () {
 });
 
 describe('images', function () {
+  describe('image create', function () {
+    beforeEach(function (done) {
+      var count = createCount(2, done);
+      docker.createImage({
+        fromImage: 'foo',
+        tag: '999',
+        Created: 100
+      }, function (err, res) {
+        if (err) { return done(err); }
+        res.on('data', noop);
+        count.next();
+        docker.createImage({
+          fromImage: 'foo2',
+          tag: '9992'
+        }, function (err2, res2) {
+          if (err2) { return done(err2); }
+          res2.on('data', noop);
+          count.next();
+        });
+      });
+    });
+    afterEach(function (done) {
+      var count = createCount(2, done);
+      docker.listImages(function (err, images) {
+        if (err) { return done(err); }
+        docker.getImage(images[0].Id).remove(count.next);
+        docker.getImage(images[1].Id).remove(count.next);
+      });
+    });
+    it('should allow image mocking of Created timestamp', function (done) {
+      docker.listImages(function (err, images) {
+        if (err) { return done(err); }
+        expect(images).to.have.length(2);
+        expect(images[0].Created).to.equal(100);
+        expect(images[1].Created).to.be.about(new Date() / 1000 | 0, 10);
+        done();
+      });
+    });
+  });
+
   it('should be able to build images, and delete it', function (done) {
     var pack = tar.pack();
     pack.entry({ name: './', type: 'directory' });
@@ -433,6 +473,8 @@ describe('images', function () {
         expect(images).to.have.length(2);
         expect(images[0].RepoTags).to.have.length(1);
         expect(images[0].RepoTags[0]).to.equal('testImage:latest');
+        expect(images[0].Created).to.be.a.number();
+        expect(images[0].Created).to.be.about(new Date() / 1000 | 0, 10);
         done();
       });
     });
