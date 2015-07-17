@@ -10,6 +10,7 @@ var noop = require('101/noop');
 var request = require('request');
 var tar = require('tar-stream');
 var zlib = require('zlib');
+var StringStream = require('../lib/string-stream');
 
 var Lab = require('lab');
 var lab = exports.lab = Lab.script();
@@ -477,6 +478,13 @@ describe('images', function () {
         expect(images[0].Created).to.be.about(new Date() / 1000 | 0, 10);
         done();
       });
+    });
+    it('should save an image', function (done) {
+      docker.getImage('testImage').get(handleStream(done));
+    });
+    it('should save an image', function (done) {
+      var stringStream = new StringStream('Just a bunch of text');
+      docker.loadImage(stringStream, done);
     });
     it('should push an image', function (done) {
       docker.getImage('testImage')
