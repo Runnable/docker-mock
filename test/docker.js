@@ -10,8 +10,7 @@ var noop = require('101/noop');
 var request = require('request');
 var tar = require('tar-stream');
 var zlib = require('zlib');
-var StringStream = require('../lib/string-stream');
-
+var fs = require('fs');
 var Lab = require('lab');
 var lab = exports.lab = Lab.script();
 
@@ -462,11 +461,13 @@ describe('images', function () {
         watchBuild(done));
     });
     afterEach(function (done) {
-      var count = createCount(2, done);
-      docker.getImage('testImage').remove(count.next);
-      docker
-        .getImage('somedomain.tld/username/testImage:tag')
-        .remove(count.next);
+       docker.listImages(function (err, images) {
+        if (err) { return done(err); }
+        var count = createCount(images.length, done);
+        images.forEach(function (i) {
+          docker.getImage(i.Id || i.id).remove(count.next);
+        });
+      });
     });
     it('should list all the images', function (done) {
       docker.listImages(function (err, images) {
@@ -479,12 +480,25 @@ describe('images', function () {
         done();
       });
     });
+    it('should 404 on save image if it does not exist', function (done) {
+      docker.getImage('fake').get(function (err, res) {
+        expect(err.statusCode).to.equal(404);
+        done();
+      });
+    });
     it('should save an image', function (done) {
       docker.getImage('testImage').get(handleStream(done));
     });
-    it('should save an image', function (done) {
-      var stringStream = new StringStream('Just a bunch of text');
-      docker.loadImage(stringStream, done);
+    it('should load an image', function (done) {
+      var imageStream = fs.createReadStream('misc/busybox.tar');
+      docker.loadImage(imageStream, function (err) {
+        if (err) { return done(err); }
+        docker.listImages(function (err, images) {
+          if (err) { return done(err); }
+          expect(images).to.have.length(5);
+          done();
+        });
+      });
     });
     it('should push an image', function (done) {
       docker.getImage('testImage')
