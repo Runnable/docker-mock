@@ -465,7 +465,7 @@ describe('images', function () {
         if (err) { return done(err); }
         var count = createCount(images.length, done);
         images.forEach(function (i) {
-          docker.getImage(i.Id || i.id).remove(count.next);
+          docker.getImage(i.Id).remove(count.next);
         });
       });
     });
