@@ -461,7 +461,7 @@ describe('images', function () {
         watchBuild(done));
     });
     afterEach(function (done) {
-       docker.listImages(function (err, images) {
+      docker.listImages(function (err, images) {
         if (err) { return done(err); }
         var count = createCount(images.length, done);
         images.forEach(function (i) {
@@ -481,7 +481,7 @@ describe('images', function () {
       });
     });
     it('should 404 on save image if it does not exist', function (done) {
-      docker.getImage('fake').get(function (err, res) {
+      docker.getImage('fake').get(function (err) {
         expect(err.statusCode).to.equal(404);
         done();
       });
@@ -490,15 +490,28 @@ describe('images', function () {
       docker.getImage('testImage').get(handleStream(done));
     });
     it('should load an image', function (done) {
-      var imageStream = fs.createReadStream('misc/busybox.tar');
-      docker.loadImage(imageStream, function (err) {
-        if (err) { return done(err); }
-        docker.listImages(function (err, images) {
-          if (err) { return done(err); }
-          expect(images).to.have.length(5);
-          done();
-        });
-      });
+      var numImages;
+      async.series([
+        function listImages (cb) {
+          docker.listImages(function (err, images) {
+            if (err) { return cb(err); }
+            numImages = images.length;
+            cb();
+          });
+        },
+        function loadImage (cb) {
+          var imageStream = fs.createReadStream('misc/busybox.tar');
+          docker.loadImage(imageStream, cb);
+        },
+        function listImages (cb) {
+          docker.listImages(function (err, images) {
+            if (err) { return cb(err); }
+            // the tarball has 3 images and no repotag: three layers expected
+            expect(images.length - numImages).to.equal(3);
+            cb();
+          });
+        }
+      ], done);
     });
     it('should push an image', function (done) {
       docker.getImage('testImage')
