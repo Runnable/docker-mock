@@ -30,7 +30,8 @@
     "keypather": "^1.10.1",
     "middleware-flow": "^0.8.0",
     "minimist": "^1.1.0",
-    "tar": "^2.1.0"
+    "tar": "^2.1.0",
+    "tar-stream": "^1.2.1"
   },
   "devDependencies": {
     "JSONStream": "^1.0.4",
@@ -41,7 +42,6 @@
     "dockerode": "^2.2.2",
     "eslint": "^1.2.1",
     "lab": "^5.2.1",
-    "request": "^2.51.0",
-    "tar-stream": "^1.1.2"
+    "request": "^2.51.0"
   }
 }
