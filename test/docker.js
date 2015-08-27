@@ -396,7 +396,7 @@ describe('images', function () {
     var image = docker.getImage('buildTest');
     pack.pipe(request.post({
       url: 'http://localhost:5354/build',
-      qs: { 't': 'buildTest' },
+      qs: { t: 'buildTest' },
       headers: { 'content-type': 'application/x-gzip' }
     })).on('end', function (err) {
       if (err) { return done(err); }
