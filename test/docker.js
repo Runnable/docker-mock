@@ -10,7 +10,7 @@ var noop = require('101/noop');
 var request = require('request');
 var tar = require('tar-stream');
 var zlib = require('zlib');
-
+var fs = require('fs');
 var Lab = require('lab');
 var lab = exports.lab = Lab.script();
 
@@ -461,11 +461,13 @@ describe('images', function () {
         watchBuild(done));
     });
     afterEach(function (done) {
-      var count = createCount(2, done);
-      docker.getImage('testImage').remove(count.next);
-      docker
-        .getImage('somedomain.tld/username/testImage:tag')
-        .remove(count.next);
+      docker.listImages(function (err, images) {
+        if (err) { return done(err); }
+        var count = createCount(images.length, done);
+        images.forEach(function (i) {
+          docker.getImage(i.Id).remove(count.next);
+        });
+      });
     });
     it('should list all the images', function (done) {
       docker.listImages(function (err, images) {
@@ -477,6 +479,39 @@ describe('images', function () {
         expect(images[0].Created).to.be.about(new Date() / 1000 | 0, 10);
         done();
       });
+    });
+    it('should 404 on save image if it does not exist', function (done) {
+      docker.getImage('fake').get(function (err) {
+        expect(err.statusCode).to.equal(404);
+        done();
+      });
+    });
+    it('should save an image', function (done) {
+      docker.getImage('testImage').get(handleStream(done));
+    });
+    it('should load an image', function (done) {
+      var numImages;
+      async.series([
+        function listImages (cb) {
+          docker.listImages(function (err, images) {
+            if (err) { return cb(err); }
+            numImages = images.length;
+            cb();
+          });
+        },
+        function loadImage (cb) {
+          var imageStream = fs.createReadStream('misc/busybox.tar');
+          docker.loadImage(imageStream, cb);
+        },
+        function listImages (cb) {
+          docker.listImages(function (err, images) {
+            if (err) { return cb(err); }
+            // the tarball has 3 images and no repotag: three layers expected
+            expect(images.length - numImages).to.equal(3);
+            cb();
+          });
+        }
+      ], done);
     });
     it('should push an image', function (done) {
       docker.getImage('testImage')
