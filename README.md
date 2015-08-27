@@ -1,10 +1,11 @@
 # docker-mock
 
-[![Build Status](https://travis-ci.org/Runnable/docker-mock.svg?branch=master)](https://travis-ci.org/Runnable/docker-mock)
-[![Dependency Status](https://david-dm.org/Runnable/docker-mock.svg)](https://david-dm.org/Runnable/docker-mock)
-[![devDependency Status](https://david-dm.org/Runnable/docker-mock/dev-status.svg)](https://david-dm.org/Runnable/docker-mock#info=devDependencies)
-[![Code Climate](https://codeclimate.com/github/Runnable/docker-mock/badges/gpa.svg)](https://codeclimate.com/github/Runnable/docker-mock)
-[![Test Coverage](https://codeclimate.com/github/Runnable/docker-mock/badges/coverage.svg)](https://codeclimate.com/github/Runnable/docker-mock)
+[![Build Status](https://img.shields.io/travis/Runnable/docker-mock.svg?style=flat-square)](https://travis-ci.org/Runnable/docker-mock)
+[![Dependency Status](https://img.shields.io/david/Runnable/docker-mock.svg?style=flat-square)](https://david-dm.org/Runnable/docker-mock)
+[![devDependency Status](https://img.shields.io/david/dev/Runnable/docker-mock.svg?style=flat-square)](https://david-dm.org/Runnable/docker-mock#info=devDependencies)
+[![Code Climate](https://img.shields.io/codeclimate/github/Runnable/docker-mock.svg?style=flat-square)](https://codeclimate.com/github/Runnable/docker-mock)
+[![Test Coverage](https://img.shields.io/codeclimate/coverage/github/Runnable/docker-mock.svg?style=flat-square)](https://codeclimate.com/github/Runnable/docker-mock)
+
 [![NPM](https://nodei.co/npm/docker-mock.png?compact=true)](https://nodei.co/npm/docker-mock/)
 
 A mock for [Docker](http://docker.io)!
