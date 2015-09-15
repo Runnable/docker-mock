@@ -19,7 +19,9 @@ describe('Container Store', function () {
       Id: 4,
       Image: 'ubuntu',
       Name: '/test-container',
-      Created: Date.now()
+      Created: Date.now(),
+      State: { Running: true },
+      Config: { Labels: { label: 'test-label' } }
     })
     containers = new ContainerStore()
     containers._store[4] = container
@@ -74,6 +76,25 @@ describe('Container Store', function () {
           assert.lengthOf(containers, 1)
           assert.propertyVal(containers[0], 'Id', 4)
           assert.propertyVal(containers[0], 'Image', 'ubuntu')
+        })
+    })
+    it('should list containers with a postive filter', function (done) {
+      var filters = {
+        status: 'running'
+      }
+      return assert.isFulfilled(containers.listContainers(filters))
+        .then(function (containers) {
+          assert.lengthOf(containers, 1)
+          assert.equal(containers[0].State.Running, true)
+        })
+    })
+    it('should list containers with a negative filter', function (done) {
+      var filters = {
+        label: { type: 'test-label' }
+      }
+      return assert.isFulfilled(containers.listContainers(filters))
+        .then(function (containers) {
+          assert.lengthOf(containers, 0)
         })
     })
   })
