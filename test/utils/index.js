@@ -47,4 +47,20 @@ describe('utils', function () {
       done();
     });
   });
+
+  describe('capitalize', function () {
+    it('should capitalize strings', function (done) {
+      expect(utils.capitalize('foo')).to.equal('Foo');
+      expect(utils.capitalize('Bar')).to.equal('Bar');
+      expect(utils.capitalize('BAR')).to.equal('BAR');
+      done();
+    });
+    it('should do nothing to not a string', function (done) {
+      var obj = {};
+      expect(utils.capitalize(obj)).to.equal(obj);
+      expect(utils.capitalize([])).to.deep.equal([]);
+      expect(utils.capitalize(3)).to.deep.equal(3);
+      done();
+    });
+  });
 });

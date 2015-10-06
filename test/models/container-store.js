@@ -21,7 +21,7 @@ describe('Container Store', function () {
     assign(container, {
       Id: 4,
       Image: 'ubuntu',
-      name: 'test-container',
+      Name: 'test-container',
       Created: Date.now()
     });
     containers = new ContainerStore();
