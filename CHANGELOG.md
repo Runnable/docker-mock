@@ -1,6 +1,6 @@
 ## Change Log
 
-### v4.0.0 (2015/10/06 22:16 +00:00)
+### v4.0.0 (2015/10/06 22:09 +00:00)
 - [#42](https://github.com/Runnable/docker-mock/pull/42) Promises (@bkendall)
 
 ### v3.0.1 (2015/10/06 20:20 +00:00)
