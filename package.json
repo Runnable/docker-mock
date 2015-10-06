@@ -7,6 +7,7 @@
     "docker-mock": "./bin/cli.js"
   },
   "scripts": {
+    "changelog": "github-changes -o Runnable -r docker-mock -a --only-pulls --use-commit-body --order-semver",
     "coverage": "lab --reporter lcov --output lcov.info",
     "unit": "lab --threshold 100 test/models test/utils",
     "test": "lab --threshold 98",
@@ -45,6 +46,7 @@
     "cucumber": "^0.5.2",
     "dockerode": "^2.2.2",
     "eslint": "^1.2.1",
+    "github-changes": "^1.0.0",
     "lab": "^5.2.1",
     "request": "^2.51.0"
   }
