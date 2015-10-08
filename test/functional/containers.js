@@ -53,7 +53,7 @@ describe('containers', function () {
     ], function (err, containerData) {
       if (err) { return done(err); }
       // this should be capitalized and used
-      expect(containerData.Name).to.equal('/'+createData.name);
+      expect(containerData.Name).to.equal('/' + createData.name);
       expect(containerData.Env).to.be.an.array();
       expect(containerData.Env).to.have.length(1);
       expect(containerData.Env[0]).to.equal(createData.Env[0]);
