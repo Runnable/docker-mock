@@ -53,11 +53,11 @@ describe('containers', function () {
     ], function (err, containerData) {
       if (err) { return done(err); }
       // this should be capitalized and used
-      expect(containerData.Name).to.equal(createData.name);
+      expect(containerData.Name).to.equal('/'+createData.name);
       expect(containerData.Env).to.be.an.array();
       expect(containerData.Env).to.have.length(1);
       expect(containerData.Env[0]).to.equal(createData.Env[0]);
-      docker.getContainer(containerData.Id).remove(done);
+      docker.getContainer(createData.name).remove(done);
     });
   });
   it('should list all the containers when there are none', function (done) {
