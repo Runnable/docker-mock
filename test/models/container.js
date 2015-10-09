@@ -41,7 +41,10 @@ describe('Container', function () {
         count.next();
       });
       container.start()
-        .then(function (c) { expect(c.State.Running).to.be.true(); })
+        .then(function (c) {
+          expect(c.State.Running).to.be.true();
+          expect(c.NetworkSettings.Ports).to.exist();
+        })
         .finally(count.next);
     });
     it('should throw NotModifiedError if already started', function (done) {
