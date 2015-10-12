@@ -1,5 +1,11 @@
 ## Change Log
 
+### v5.0.1 (2015/10/09 01:28 +00:00)
+- [#47](https://github.com/Runnable/docker-mock/pull/47) fixed NetworkSettings start bug (@tjmehta)
+
+### v5.0.0 (2015/10/08 23:33 +00:00)
+- [#46](https://github.com/Runnable/docker-mock/pull/46) fix inspect containerName value (@tjmehta)
+
 ### v4.0.0 (2015/10/06 22:09 +00:00)
 - [#42](https://github.com/Runnable/docker-mock/pull/42) Promises (@bkendall)
 
