@@ -1,5 +1,8 @@
 ## Change Log
 
+### v5.0.2 (2015/10/14 21:26 +00:00)
+- [#48](https://github.com/Runnable/docker-mock/pull/48) fix: move callback-count to dependencies (@bkendall)
+
 ### v5.0.1 (2015/10/09 01:28 +00:00)
 - [#47](https://github.com/Runnable/docker-mock/pull/47) fixed NetworkSettings start bug (@tjmehta)
 
