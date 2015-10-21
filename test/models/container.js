@@ -113,6 +113,23 @@ describe('Container', function () {
   });
 
   describe('kill (stop)', function () {
+    it('should stop via kill (default to SIGKILL) and emit the correct events',
+      function (done) {
+        var expectedEvents = [ 'die', 'kill' ];
+        var count = createCount(expectedEvents.length + 1, done);
+        container.on('event', function (type) {
+          var expectedEvent = expectedEvents.shift();
+          expect(type).to.equal(expectedEvent);
+          count.next();
+        });
+        container.State.Running = true;
+        container.stop('kill')
+          .then(function (c) {
+            expect(c.State.Running).to.be.false();
+            expect(c.State.ExitCode).to.equal(0);
+          })
+          .finally(count.next);
+      });
     it('should stop via kill and emit the correct events', function (done) {
       var expectedEvents = [ 'die', 'kill' ];
       var count = createCount(expectedEvents.length + 1, done);
@@ -122,9 +139,29 @@ describe('Container', function () {
         count.next();
       });
       container.State.Running = true;
-      container.stop('kill')
-        .then(function (c) { expect(c.State.Running).to.be.false(); })
+      container.stop('kill', 'SIGKILL')
+        .then(function (c) {
+          expect(c.State.Running).to.be.false();
+          expect(c.State.ExitCode).to.equal(1);
+        })
         .finally(count.next);
     });
+    it('should stop via kill w/ signal and emit the correct events',
+      function (done) {
+        var expectedEvents = [ 'die', 'kill' ];
+        var count = createCount(expectedEvents.length + 1, done);
+        container.on('event', function (type) {
+          var expectedEvent = expectedEvents.shift();
+          expect(type).to.equal(expectedEvent);
+          count.next();
+        });
+        container.State.Running = true;
+        container.stop('kill', 'SIGINT')
+          .then(function (c) {
+            expect(c.State.Running).to.be.false();
+            expect(c.State.ExitCode).to.equal(0);
+          })
+          .finally(count.next);
+      });
   });
 });
