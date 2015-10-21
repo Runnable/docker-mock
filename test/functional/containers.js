@@ -299,6 +299,36 @@ describe('containers', function () {
         container.inspect(function (err, data) {
           if (err) { return count.next(err); }
           expect(data.State.Running).to.be.false();
+          expect(data.State.ExitCode).to.equal(1);
+          count.next();
+        });
+      });
+    });
+    it('should be able to kill it w/ a signal', function (done) {
+      var count = createCount(4, function (err) {
+        dockerMock.events.stream.removeAllListeners('data');
+        done(err);
+      });
+      // these events should happen in this order
+      var expectedEvents = [ 'start', 'die', 'kill' ];
+      dockerMock.events.stream.on('data', function (data) {
+        data = JSON.parse(data);
+        var expectedEvent = expectedEvents.shift();
+        expect(data).to.deep.contain({
+          status: expectedEvent,
+          id: container.id
+        });
+        count.next();
+      });
+      async.series([
+        container.start.bind(container),
+        container.kill.bind(container, { signal: 'SIGINT' })
+      ], function (seriesErr) {
+        if (seriesErr) { return count.next(seriesErr); }
+        container.inspect(function (err, data) {
+          if (err) { return count.next(err); }
+          expect(data.State.Running).to.be.false();
+          expect(data.State.ExitCode).to.equal(0); // 0 anything other than SIGKILL
           count.next();
         });
       });
