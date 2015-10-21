@@ -328,7 +328,8 @@ describe('containers', function () {
         container.inspect(function (err, data) {
           if (err) { return count.next(err); }
           expect(data.State.Running).to.be.false();
-          expect(data.State.ExitCode).to.equal(0); // 0 anything other than SIGKILL
+          // 0 anything other than SIGKILL
+          expect(data.State.ExitCode).to.equal(0);
           count.next();
         });
       });
