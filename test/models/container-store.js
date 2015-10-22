@@ -1,22 +1,19 @@
 'use strict';
 
-var EventEmitter = require('events').EventEmitter;
-var ContainerStore = require('../../lib/models/container-store');
-var NotFoundError = require('../../lib/models/base-store').NotFoundError;
-var assign = require('101/assign');
-var createCount = require('callback-count');
+var chai = require('chai');
+chai.use(require('chai-as-promised'));
+var assert = chai.assert;
 
-var Lab = require('lab');
-var lab = exports.lab = Lab.script();
-var beforeEach = lab.beforeEach;
-var describe = lab.describe;
-var expect = require('code').expect;
-var it = lab.it;
+var assign = require('101/assign');
+var ContainerStore = require('../../lib/models/container-store');
+var createCount = require('callback-count');
+var EventEmitter = require('events').EventEmitter;
+var NotFoundError = require('../../lib/models/base-store').NotFoundError;
 
 describe('Container Store', function () {
   var containers;
   var container;
-  beforeEach(function (done) {
+  beforeEach(function () {
     container = new EventEmitter();
     assign(container, {
       Id: 4,
@@ -26,91 +23,80 @@ describe('Container Store', function () {
     });
     containers = new ContainerStore();
     containers._store[4] = container;
-    done();
   });
 
   describe('findOneByName', function () {
-    it('should find something by name', function (done) {
-      containers.findOneByName('test-container')
-        .then(function (o) { expect(o).to.deep.equal(container); })
-        .finally(done);
+    it('should find something by name', function () {
+      assert.isFulfilled(containers.findOneByName('test-container'))
+        .then(function (o) { assert.deepEqual(o, container); });
     });
 
-    it('should return NotFoundError if cannot find container', function (done) {
-      containers.findOneByName('nope-container')
-        .then(function () {
-          throw new Error('it should have returned NotFoundError');
-        })
-        .catch(function (err) {
-          expect(err).to.be.an.instanceof(NotFoundError);
-        })
-        .finally(done);
+    it('should return NotFoundError if cannot find container', function () {
+      assert.isRejected(
+        containers.findOneByName('nope-container'),
+        NotFoundError
+      );
     });
   });
 
   describe('findOneByIdOrName', function () {
-    it('should find one by name', function (done) {
-      containers.findOneByIdOrName('test-container')
-        .then(function (o) { expect(o).to.deep.equal(container); })
-        .finally(done);
+    it('should find one by name', function () {
+      assert.isFulfilled(containers.findOneByIdOrName('test-container'))
+        .then(function (o) { assert.deepEqual(o, container); });
     });
-    it('should find one by id', function (done) {
-      containers.findOneByIdOrName(4)
-        .then(function (o) { expect(o).to.deep.equal(container); })
-        .finally(done);
+    it('should find one by id', function () {
+      assert.isFulfilled(containers.findOneByIdOrName(4))
+        .then(function (o) { assert.deepEqual(o, container); });
     });
   });
 
   describe('deleteById', function () {
     it('should remove a container and emit event', function (done) {
       var expectedEvents = ['destroy'];
-      var count = createCount(expectedEvents.length + 1, done);
+      var count = createCount(expectedEvents.length, done);
       containers.on('event', function (type, c) {
         var expectedEvent = expectedEvents.shift();
-        expect(type).to.equal(expectedEvent);
-        expect(c).to.deep.equal(container);
+        assert.equal(type, expectedEvent);
+        assert.deepEqual(c, container);
         count.next();
       });
-      containers.deleteById(4)
-        .finally(count.next);
+      assert.isFulfilled(containers.deleteById(4));
     });
   });
 
   describe('listContainers', function () {
-    it('should list containers', function (done) {
-      containers.listContainers()
+    it('should list containers', function () {
+      assert.isFulfilled(containers.listContainers())
         .then(function (containers) {
-          expect(containers).to.have.length(1);
-          expect(containers[0]).to.deep.contain({ Id: 4, Image: 'ubuntu' });
-        })
-        .finally(done);
+          assert.lengthOf(containers, 1);
+          assert.propertyVal(containers[0], 'Id', 4);
+          assert.propertyVal(containers[0], 'Image', 'ubuntu');
+        });
     });
   });
 
   describe('createContainer', function () {
-    it('should create a container', function (done) {
-      containers.createContainer({})
+    it('should create a container', function () {
+      assert.isFulfilled(containers.createContainer({}))
         .then(function () {
           return containers.listContainers();
         })
         .then(function (containers) {
-          expect(containers).to.have.length(2);
-        })
-        .finally(done);
+          assert.lengthOf(containers, 2);
+        });
     });
     it('should register for container events and emit create', function (done) {
       var expectedEvents = [ 'create', 'start' ];
-      var count = createCount(expectedEvents.length + 1, done);
+      var count = createCount(expectedEvents.length, done);
       containers.on('event', function (type) {
         var expectedEvent = expectedEvents.shift();
-        expect(type).to.equal(expectedEvent);
+        assert.equal(type, expectedEvent);
         count.next();
       });
-      containers.createContainer({})
+      assert.isFulfilled(containers.createContainer({}))
         .then(function (container) {
           return container.start();
-        })
-        .finally(count.next);
+        });
     });
   });
 });

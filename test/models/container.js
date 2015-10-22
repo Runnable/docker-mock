@@ -1,167 +1,110 @@
 'use strict';
 
-var Container = require('../../lib/models/container');
-var NotModifiedError = require('../../lib/models/base-store').NotModifiedError;
-var createCount = require('callback-count');
+var chai = require('chai');
+chai.use(require('chai-as-promised'));
+var assert = chai.assert;
 
-var Lab = require('lab');
-var lab = exports.lab = Lab.script();
-var beforeEach = lab.beforeEach;
-var describe = lab.describe;
-var expect = require('code').expect;
-var it = lab.it;
+var Container = require('../../lib/models/container');
+var createCount = require('callback-count');
+var NotModifiedError = require('../../lib/models/base-store').NotModifiedError;
 
 describe('Container', function () {
   var container;
-  beforeEach(function (done) {
+  beforeEach(function () {
     container = new Container();
-    done();
   });
 
   describe('constructor options', function () {
-    it('should respect various options passed in', function (done) {
+    it('should respect various options passed in', function () {
       var opts = {
         Labels: { hello: 'world' },
         Image: 'ubuntu'
       };
       var c = new Container(opts);
-      expect(c.Config.Labels).to.deep.equal({ hello: 'world' });
-      expect(c.Image).to.equal('ubuntu');
-      done();
+      assert.deepProperty(c, 'Config.Labels');
+      assert.deepEqual(c.Config.Labels, { hello: 'world' });
+      assert.propertyVal(c, 'Image', 'ubuntu');
     });
   });
 
   describe('start', function () {
     it('should start and emit the correct events', function (done) {
-      var expectedEvents = ['start'];
-      var count = createCount(expectedEvents.length + 1, done);
-      container.on('event', function (type) {
-        var expectedEvent = expectedEvents.shift();
-        expect(type).to.equal(expectedEvent);
-        count.next();
-      });
-      container.start()
+      assertEvents(container, ['start'], done);
+      assert.isFulfilled(container.start())
         .then(function (c) {
-          expect(c.State.Running).to.be.true();
-          expect(c.NetworkSettings.Ports).to.exist();
-        })
-        .finally(count.next);
+          assert.deepPropertyVal(c, 'State.Running', true);
+          assert.deepProperty(c, 'NetworkSettings.Ports');
+        });
     });
-    it('should throw NotModifiedError if already started', function (done) {
+    it('should throw NotModifiedError if already started', function () {
       container.State.Running = true;
-      container.start()
-        .then(function () {
-          throw new Error('it should have returned NotFoundError');
-        })
-        .catch(function (err) {
-          expect(err).to.be.instanceof(NotModifiedError);
-        })
-        .finally(done);
+      assert.isRejected(container.start(), NotModifiedError);
     });
   });
 
   describe('restart (it\'s start/stop)', function () {
     it('should start and emit the correct events', function (done) {
-      var expectedEvents = [ 'start', 'restart' ];
-      var count = createCount(expectedEvents.length + 1, done);
-      container.on('event', function (type) {
-        var expectedEvent = expectedEvents.shift();
-        expect(type).to.equal(expectedEvent);
-        count.next();
-      });
+      assertEvents(container, [ 'start', 'restart' ], done);
       // start(true) => restart
-      container.start(true)
-        .finally(count.next);
+      assert.isFulfilled(container.start(true));
     });
     it('should stop and emit the correct events', function (done) {
-      var expectedEvents = ['die'];
-      var count = createCount(expectedEvents.length + 1, done);
-      container.on('event', function (type) {
-        var expectedEvent = expectedEvents.shift();
-        expect(type).to.equal(expectedEvent);
-        count.next();
-      });
+      assertEvents(container, ['die'], done);
       // start(true) => restart
-      container.stop('restart')
-        .finally(count.next);
+      assert.isFulfilled(container.stop('restart'));
     });
   });
 
   describe('stop', function () {
     it('should stop and emit the correct events', function (done) {
-      var expectedEvents = [ 'die', 'stop' ];
-      var count = createCount(expectedEvents.length + 1, done);
-      container.on('event', function (type) {
-        var expectedEvent = expectedEvents.shift();
-        expect(type).to.equal(expectedEvent);
-        count.next();
-      });
+      assertEvents(container, [ 'die', 'stop' ], done);
       container.State.Running = true;
-      container.stop()
-        .finally(count.next);
+      assert.isFulfilled(container.stop());
     });
-    it('should throw NotModifiedError if already stopped', function (done) {
-      container.stop()
-        .then(function () {
-          throw new Error('it should have returned NotFoundError');
-        })
-        .catch(function (err) {
-          expect(err).to.be.instanceof(NotModifiedError);
-        })
-        .finally(done);
+    it('should throw NotModifiedError if already stopped', function () {
+      assert.isRejected(container.stop(), NotModifiedError);
     });
   });
 
   describe('kill (stop)', function () {
     it('should stop via kill (default to SIGKILL) and emit the correct events',
       function (done) {
-        var expectedEvents = [ 'die', 'kill' ];
-        var count = createCount(expectedEvents.length + 1, done);
-        container.on('event', function (type) {
-          var expectedEvent = expectedEvents.shift();
-          expect(type).to.equal(expectedEvent);
-          count.next();
-        });
+        assertEvents(container, [ 'die', 'kill' ], done);
         container.State.Running = true;
-        container.stop('kill')
+        assert.isFulfilled(container.stop('kill'))
           .then(function (c) {
-            expect(c.State.Running).to.be.false();
-            expect(c.State.ExitCode).to.equal(0);
-          })
-          .finally(count.next);
-      });
+            assert.equal(c.State.Running, false);
+            assert.deepPropertyVal(c, 'State.ExitCode', 0);
+          });
+      }
+    );
     it('should stop via kill and emit the correct events', function (done) {
-      var expectedEvents = [ 'die', 'kill' ];
-      var count = createCount(expectedEvents.length + 1, done);
-      container.on('event', function (type) {
-        var expectedEvent = expectedEvents.shift();
-        expect(type).to.equal(expectedEvent);
-        count.next();
-      });
+      assertEvents(container, [ 'die', 'kill' ], done);
       container.State.Running = true;
-      container.stop('kill', 'SIGKILL')
+      assert.isFulfilled(container.stop('kill', 'SIGKILL'))
         .then(function (c) {
-          expect(c.State.Running).to.be.false();
-          expect(c.State.ExitCode).to.equal(1);
-        })
-        .finally(count.next);
+          assert.deepPropertyVal(c, 'State.Running', false);
+          assert.deepPropertyVal(c, 'State.ExitCode', 1);
+        });
     });
     it('should stop via kill w/ signal and emit the correct events',
       function (done) {
-        var expectedEvents = [ 'die', 'kill' ];
-        var count = createCount(expectedEvents.length + 1, done);
-        container.on('event', function (type) {
-          var expectedEvent = expectedEvents.shift();
-          expect(type).to.equal(expectedEvent);
-          count.next();
-        });
+        assertEvents(container, [ 'die', 'kill' ], done);
         container.State.Running = true;
-        container.stop('kill', 'SIGINT')
+        assert.isFulfilled(container.stop('kill', 'SIGINT'))
           .then(function (c) {
-            expect(c.State.Running).to.be.false();
-            expect(c.State.ExitCode).to.equal(0);
-          })
-          .finally(count.next);
+            assert.deepPropertyVal(c, 'State.Running', false);
+            assert.deepPropertyVal(c, 'State.ExitCode', 0);
+          });
       });
   });
 });
+
+function assertEvents (container, events, callback) {
+  var count = createCount(events.length, callback);
+  container.on('event', function (type) {
+    var expectedEvent = events.shift();
+    assert.equal(type, expectedEvent);
+    count.next();
+  });
+}

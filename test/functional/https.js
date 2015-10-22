@@ -1,18 +1,13 @@
 'use strict';
 
+var chai = require('chai');
+chai.use(require('chai-as-promised'));
+var assert = chai.assert;
+
 var dockerMock = require('../../lib/index');
 var fs = require('fs');
 var https = require('https');
 var join = require('path').join;
-
-var Lab = require('lab');
-var lab = exports.lab = Lab.script();
-
-var after = lab.after;
-var before = lab.before;
-var describe = lab.describe;
-var expect = require('code').expect;
-var it = lab.it;
 
 var docker = require('dockerode')({
   protocol: 'https',
@@ -37,7 +32,7 @@ describe('https', function () {
   it('should successfully connect', function (done) {
     docker.info(function (err, data) {
       if (err) { return done(err); }
-      expect(data).to.deep.equal({
+      assert.deepEqual(data, {
         Containers: 0,
         Images: 0,
         Mock: true

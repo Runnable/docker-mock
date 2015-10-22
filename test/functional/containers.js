@@ -1,21 +1,15 @@
 'use strict';
 
+var chai = require('chai');
+chai.use(require('chai-as-promised'));
+var assert = chai.assert;
+
 var async = require('async');
 var checkClean = require('./fixtures').checkClean;
 var concat = require('concat-stream');
 var createCount = require('callback-count');
 var dockerMock = require('../../lib/index');
 var noop = require('101/noop');
-
-var Lab = require('lab');
-var lab = exports.lab = Lab.script();
-var after = lab.after;
-var afterEach = lab.afterEach;
-var before = lab.before;
-var beforeEach = lab.beforeEach;
-var describe = lab.describe;
-var expect = require('code').expect;
-var it = lab.it;
 
 var docker = require('dockerode')({
   host: 'http://localhost',
@@ -53,20 +47,21 @@ describe('containers', function () {
     ], function (err, containerData) {
       if (err) { return done(err); }
       // this should be capitalized and used
-      expect(containerData.Name).to.equal('/' + createData.name);
-      expect(containerData.Env).to.be.an.array();
-      expect(containerData.Env).to.have.length(1);
-      expect(containerData.Env[0]).to.equal(createData.Env[0]);
+      assert.propertyVal(containerData, 'Name', '/' + createData.name);
+      assert.isArray(containerData.Env);
+      assert.lengthOf(containerData.Env, 1);
+      assert.equal(containerData.Env[0], createData.Env[0]);
       docker.getContainer(createData.name).remove(done);
     });
   });
   it('should list all the containers when there are none', function (done) {
     docker.listContainers(function (err, containers) {
       if (err) { return done(err); }
-      expect(containers.length).to.equal(0);
+      assert.lengthOf(containers, 0);
       done();
     });
   });
+
   describe('labels', function () {
     var container;
     var Labels = {
@@ -86,15 +81,20 @@ describe('containers', function () {
     afterEach(function (done) {
       container.remove(done);
     });
+
     it('should save Labels on create and respond with Labels on inspect',
-    function (done) {
-      container.inspect(function (err, data) {
-        if (err) { return done(err); }
-        expect(data.Config.Labels).to.deep.contain(Labels);
-        done();
-      });
-    });
+      function (done) {
+        container.inspect(function (err, data) {
+          if (err) { return done(err); }
+          Object.keys(Labels).forEach(function (l) {
+            assert.equal(data.Config.Labels[l], Labels[l]);
+          });
+          done();
+        });
+      }
+    );
   });
+
   describe('interactions', function () {
     var container;
     beforeEach(function (done) {
@@ -111,15 +111,15 @@ describe('containers', function () {
     it('should list all the containers', function (done) {
       docker.listContainers(function (err, containers) {
         if (err) { return done(err); }
-        expect(containers.length).to.equal(1);
-        expect(containers[0].Id).to.equal(container.id);
+        assert.lengthOf(containers, 1);
+        assert.equal(containers[0].Id, container.id);
         done();
       });
     });
     it('should give us information about it', function (done) {
       container.inspect(function (err, data) {
         if (err) { return done(err); }
-        expect(data.Id).to.equal(container.id);
+        assert.equal(data.Id, container.id);
         done();
       });
     });
@@ -151,7 +151,7 @@ describe('containers', function () {
           var image = docker.getImage('committedContainer');
           image.inspect(function (err, data) {
             if (err) { return cb(err); }
-            expect(data.Id).to.contain(imageData.Id);
+            assert.include(data.Id, imageData.Id);
             cb(null, image);
           });
         },
@@ -165,10 +165,8 @@ describe('containers', function () {
       dockerMock.events.stream.on('data', function (data) {
         dockerMock.events.stream.removeAllListeners('data');
         data = JSON.parse(data);
-        expect(data).to.deep.contain({
-          status: 'start',
-          id: container.id
-        });
+        assert.equal(data.status, 'start');
+        assert.equal(data.id, container.id);
         count.next();
       });
       async.series([
@@ -177,8 +175,8 @@ describe('containers', function () {
       ], function (err, data) {
         if (err) { return count.next(err); }
         data = data[1]; // get the inspect data
-        expect(data.State.Running).to.be.true();
-        expect(data.State.Pid).to.be.a.number();
+        assert.equal(data.State.Running, true);
+        assert.isNumber(data.State.Pid);
         count.next();
       });
     });
@@ -191,7 +189,7 @@ describe('containers', function () {
         var logs = data[1];
         var count = createCount(2, done);
         logs.pipe(concat(function (logBuffer) {
-          expect(logBuffer.toString()).to.equal('Just a bunch of text');
+          assert.equal(logBuffer.toString(), 'Just a bunch of text');
           count.next();
         }));
         logs.on('end', function () { count.next(); });
@@ -212,27 +210,22 @@ describe('containers', function () {
         if (!seriesErr) { return done('should not have started second time'); }
         container.inspect(function (err, data) {
           if (err) { return done(err); }
-          expect(data).to.deep.equal(originalInspect);
+          assert.deepEqual(data, originalInspect);
           done();
         });
       });
     });
     it('should be able to stop it', function (done) {
-      var count = createCount(4, function (err) {
+      var count = createCount(2, function (err) {
         dockerMock.events.stream.removeAllListeners('data');
         done(err);
       });
-      // these events should happen in this order
-      var expectedEvents = [ 'start', 'die', 'stop' ];
-      dockerMock.events.stream.on('data', function (data) {
-        data = JSON.parse(data);
-        var expectedEvent = expectedEvents.shift();
-        expect(data).to.deep.contain({
-          status: expectedEvent,
-          id: container.id
-        });
-        count.next();
-      });
+      assertEvents(
+        container,
+        dockerMock.events.stream,
+        [ 'start', 'die', 'stop' ],
+        count.next
+      );
       async.series([
         container.start.bind(container),
         container.stop.bind(container),
@@ -240,8 +233,8 @@ describe('containers', function () {
       ], function (err, data) {
         if (err) { return count.next(err); }
         data = data[2];
-        expect(data.State.Running).to.be.false();
-        expect(data.State.Pid).to.equal(0);
+        assert.equal(data.State.Running, false);
+        assert.equal(data.State.Pid, 0);
         count.next();
       });
     });
@@ -253,8 +246,8 @@ describe('containers', function () {
       ], function (err, data) {
         if (err) { return done(err); }
         data = data[2];
-        expect(data.State.Running).to.be.false();
-        expect(data.State.Pid).to.equal(0);
+        assert.equal(data.State.Running, false);
+        assert.equal(data.State.Pid, 0);
         done();
       });
     });
@@ -265,32 +258,27 @@ describe('containers', function () {
       ], function (seriesErr) {
         if (seriesErr) { return done(seriesErr); }
         container.stop(function (stopErr) {
-          expect(stopErr.statusCode).to.equal(304);
+          assert.propertyVal(stopErr, 'statusCode', 304);
           container.inspect(function (err, data) {
             if (err) { return done(err); }
-            expect(data.State.Running).to.be.false();
-            expect(data.State.Pid).to.equal(0);
+            assert.deepPropertyVal(data, 'State.Running', false);
+            assert.deepPropertyVal(data, 'State.Pid', 0);
             done();
           });
         });
       });
     });
     it('should be able to kill it', function (done) {
-      var count = createCount(4, function (err) {
+      var count = createCount(2, function (err) {
         dockerMock.events.stream.removeAllListeners('data');
         done(err);
       });
-      // these events should happen in this order
-      var expectedEvents = [ 'start', 'die', 'kill' ];
-      dockerMock.events.stream.on('data', function (data) {
-        data = JSON.parse(data);
-        var expectedEvent = expectedEvents.shift();
-        expect(data).to.deep.contain({
-          status: expectedEvent,
-          id: container.id
-        });
-        count.next();
-      });
+      assertEvents(
+        container,
+        dockerMock.events.stream,
+        [ 'start', 'die', 'kill' ],
+        count.next
+      );
       async.series([
         container.start.bind(container),
         container.kill.bind(container)
@@ -298,28 +286,23 @@ describe('containers', function () {
         if (seriesErr) { return count.next(seriesErr); }
         container.inspect(function (err, data) {
           if (err) { return count.next(err); }
-          expect(data.State.Running).to.be.false();
-          expect(data.State.ExitCode).to.equal(1);
+          assert.deepPropertyVal(data, 'State.Running', false);
+          assert.deepPropertyVal(data, 'State.ExitCode', 1);
           count.next();
         });
       });
     });
     it('should be able to kill it w/ a signal', function (done) {
-      var count = createCount(4, function (err) {
+      var count = createCount(2, function (err) {
         dockerMock.events.stream.removeAllListeners('data');
         done(err);
       });
-      // these events should happen in this order
-      var expectedEvents = [ 'start', 'die', 'kill' ];
-      dockerMock.events.stream.on('data', function (data) {
-        data = JSON.parse(data);
-        var expectedEvent = expectedEvents.shift();
-        expect(data).to.deep.contain({
-          status: expectedEvent,
-          id: container.id
-        });
-        count.next();
-      });
+      assertEvents(
+        container,
+        dockerMock.events.stream,
+        [ 'start', 'die', 'kill' ],
+        count.next
+      );
       async.series([
         container.start.bind(container),
         container.kill.bind(container, { signal: 'SIGINT' })
@@ -327,29 +310,24 @@ describe('containers', function () {
         if (seriesErr) { return count.next(seriesErr); }
         container.inspect(function (err, data) {
           if (err) { return count.next(err); }
-          expect(data.State.Running).to.be.false();
+          assert.deepPropertyVal(data, 'State.Running', false);
           // 0 anything other than SIGKILL
-          expect(data.State.ExitCode).to.equal(0);
+          assert.deepPropertyVal(data, 'State.ExitCode', 0);
           count.next();
         });
       });
     });
     it('should be able to restart it', function (done) {
-      var count = createCount(5, function (err) {
+      var count = createCount(2, function (err) {
         dockerMock.events.stream.removeAllListeners('data');
         done(err);
       });
-      // these events should happen in this order
-      var expectedEvents = [ 'start', 'die', 'start', 'restart' ];
-      dockerMock.events.stream.on('data', function (data) {
-        data = JSON.parse(data);
-        var expectedEvent = expectedEvents.shift();
-        expect(data).to.deep.contain({
-          status: expectedEvent,
-          id: container.id
-        });
-        count.next();
-      });
+      assertEvents(
+        container,
+        dockerMock.events.stream,
+        [ 'start', 'die', 'start', 'restart' ],
+        count.next
+      );
       async.series([
         container.start.bind(container),
         container.restart.bind(container)
@@ -358,10 +336,21 @@ describe('containers', function () {
         container.inspect(function (err, data) {
           if (err) { return count.next(err); }
           // FIXME: these test are broken. this does not return true
-          expect(data.State.Running).to.be.true();
+          assert.deepPropertyVal(data, 'State.Running', true);
           count.next();
         });
       });
     });
   });
 });
+
+function assertEvents (container, eventStream, expectedEvents, callback) {
+  var count = createCount(expectedEvents.length, callback);
+  eventStream.on('data', function (data) {
+    data = JSON.parse(data);
+    var expectedEvent = expectedEvents.shift();
+    assert.propertyVal(data, 'status', expectedEvent);
+    assert.propertyVal(data, 'id', container.id);
+    count.next();
+  });
+}
