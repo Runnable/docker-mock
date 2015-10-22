@@ -1,6 +1,6 @@
 # docker-mock
 
-[![Build Status](https://img.shields.io/travis/Runnable/docker-mock.svg?style=flat-square)](https://travis-ci.org/Runnable/docker-mock)
+[![Build Status](https://img.shields.io/travis/Runnable/docker-mock/master.svg?style=flat-square)](https://travis-ci.org/Runnable/docker-mock)
 [![Dependency Status](https://img.shields.io/david/Runnable/docker-mock.svg?style=flat-square)](https://david-dm.org/Runnable/docker-mock)
 [![devDependency Status](https://img.shields.io/david/dev/Runnable/docker-mock.svg?style=flat-square)](https://david-dm.org/Runnable/docker-mock#info=devDependencies)
 [![Code Climate](https://img.shields.io/codeclimate/github/Runnable/docker-mock.svg?style=flat-square)](https://codeclimate.com/github/Runnable/docker-mock)
