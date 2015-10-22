@@ -25,6 +25,10 @@ describe('Container', function () {
       assert.deepEqual(c.Config.Labels, { hello: 'world' });
       assert.propertyVal(c, 'Image', 'ubuntu');
     });
+    it('should prepend Name with a slash', function () {
+      var c = new Container({ Name: 'foo' });
+      assert.propertyVal(c, 'Name', '/foo');
+    });
   });
 
   describe('start', function () {

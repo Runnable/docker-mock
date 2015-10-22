@@ -16,6 +16,7 @@ describe('Image Store', function () {
     images = new ImageStore();
     images._store['4'] = image;
     images._tags['ubuntu:latest'] = '4';
+    images._imageHistory['4'] = [];
   });
 
   describe('findOneByName', function () {
@@ -61,6 +62,80 @@ describe('Image Store', function () {
       image.container_config = {}; // eslint-disable-line camelcase
       assert.isFulfilled(images.listImages())
         .then(function (images) { assert.lengthOf(images, 1); });
+    });
+  });
+
+  describe('commitComtainer', function () {
+    it('should save a container', function () {
+      var mockContainer = { _id: 8 };
+      var query = { repo: 'test-repo' };
+      assert.isFulfilled(images.commitContainer(mockContainer, query))
+        .then(function (image) {
+          assert.ok(image.Id);
+          return images.listImages();
+        })
+        .then(function (images) {
+          assert.lengthOf(images, 2);
+          assert.equal(images[1].RepoTags[0], 'test-repo:latest');
+        });
+    });
+    it('should save a container with custom tag', function () {
+      var mockContainer = { _id: 8 };
+      var query = {
+        repo: 'test-repo',
+        tag: 'not-latest'
+      };
+      assert.isFulfilled(images.commitContainer(mockContainer, query))
+        .then(function (image) {
+          assert.ok(image.Id);
+          return images.listImages();
+        })
+        .then(function (images) {
+          assert.lengthOf(images, 2);
+          assert.equal(images[1].RepoTags[0], 'test-repo:not-latest');
+        });
+    });
+  });
+
+  describe('loadImage', function () {
+    it('should create an image in the store', function () {
+      var mockImage = {
+        Id: '536ed6640d827ed0ef5e0e0f582e8d8c60eb9099c767b362e4430d0a6c42f691',
+        Created: undefined,
+        RepoTags: ['test-repo:not-latest']
+      };
+      assert.isFulfilled(images.loadImage(mockImage))
+        .then(function () {
+          return images.listImages();
+        })
+        .then(function (images) {
+          assert.lengthOf(images, 2);
+          assert.equal(images[1].Id, mockImage.Id);
+        });
+    });
+    it('should create an image in the store without tags', function () {
+      var mockImage = {
+        Id: '536ed6640d827ed0ef5e0e0f582e8d8c60eb9099c767b362e4430d0a6c42f691',
+        Created: undefined,
+        RepoTags: []
+      };
+      assert.isFulfilled(images.loadImage(mockImage))
+        .then(function () {
+          return images.listImages();
+        })
+        .then(function (images) {
+          assert.lengthOf(images, 2);
+          assert.equal(images[1].Id, mockImage.Id);
+        });
+    });
+  });
+
+  describe('getHistory', function () {
+    it('should return image history', function () {
+      assert.isFulfilled(images.getHistory('4'))
+        .then(function (history) {
+          assert.ok(history);
+        });
     });
   });
 });

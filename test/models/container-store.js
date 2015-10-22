@@ -48,6 +48,9 @@ describe('Container Store', function () {
       assert.isFulfilled(containers.findOneByIdOrName(4))
         .then(function (o) { assert.deepEqual(o, container); });
     });
+    it('should return a not found error if both fail', function () {
+      assert.isRejected(containers.findOneByIdOrName(-1), NotFoundError);
+    });
   });
 
   describe('deleteById', function () {
