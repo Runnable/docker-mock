@@ -1,5 +1,8 @@
 ## Change Log
 
+### v5.1.0 (2015/10/21 23:35 +00:00)
+- [#49](https://github.com/Runnable/docker-mock/pull/49) control exit code via kill signals (@tjmehta)
+
 ### v5.0.2 (2015/10/14 21:26 +00:00)
 - [#48](https://github.com/Runnable/docker-mock/pull/48) fix: move callback-count to dependencies (@bkendall)
 
