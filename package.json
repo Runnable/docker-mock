@@ -9,11 +9,15 @@
   "scripts": {
     "changelog": "github-changes -o Runnable -r docker-mock -a --only-pulls --use-commit-body --order-semver",
     "coverage-check": "istanbul check-coverage && echo 'Coverage check successful!'",
-    "coverage": "istanbul cover ./node_modules/.bin/_mocha -- --recursive --reporter dot test/models test/utils && npm run coverage-check",
+    "coverage": "istanbul cover ./node_modules/.bin/_mocha -- $npm_package_options_mocha test/models test/utils && npm run coverage-check",
     "coveralls": "cat ./coverage/lcov.info | coveralls",
+    "functional": "NODE_ENV=test mocha $npm_package_options_mocha test",
     "lint": "eslint .",
-    "test": "NODE_ENV=test mocha --timeout 5000 --bail --recursive --reporter spec test/",
-    "unit": "NODE_ENV=test mocha --timeout 5000 --bail --recursive --reporter spec test/models test/utils"
+    "test": "npm run lint && npm run unit && npm run functional",
+    "unit": "NODE_ENV=test mocha $npm_package_options_mocha test/models test/utils"
+  },
+  "options": {
+    "mocha": "--require resources/mocha-bootstrap --timeout 5000 --recursive --reporter spec --bail"
   },
   "keywords": [
     "docker",
