@@ -33,7 +33,7 @@ describe('Container', function () {
   describe('start', function () {
     it('should start and emit the correct events', function (done) {
       assertEvents(container, ['start'], done);
-      assert.isFulfilled(container.start())
+      return assert.isFulfilled(container.start())
         .then(function (c) {
           assert.deepPropertyVal(c, 'State.Running', true);
           assert.deepProperty(c, 'NetworkSettings.Ports');
@@ -41,7 +41,7 @@ describe('Container', function () {
     });
     it('should throw NotModifiedError if already started', function () {
       container.State.Running = true;
-      assert.isRejected(container.start(), NotModifiedError);
+      return assert.isRejected(container.start(), NotModifiedError);
     });
   });
 
@@ -49,12 +49,12 @@ describe('Container', function () {
     it('should start and emit the correct events', function (done) {
       assertEvents(container, [ 'start', 'restart' ], done);
       // start(true) => restart
-      assert.isFulfilled(container.start(true));
+      return assert.isFulfilled(container.start(true));
     });
     it('should stop and emit the correct events', function (done) {
       assertEvents(container, ['die'], done);
       // start(true) => restart
-      assert.isFulfilled(container.stop('restart'));
+      return assert.isFulfilled(container.stop('restart'));
     });
   });
 
@@ -62,10 +62,10 @@ describe('Container', function () {
     it('should stop and emit the correct events', function (done) {
       assertEvents(container, [ 'die', 'stop' ], done);
       container.State.Running = true;
-      assert.isFulfilled(container.stop());
+      return assert.isFulfilled(container.stop());
     });
     it('should throw NotModifiedError if already stopped', function () {
-      assert.isRejected(container.stop(), NotModifiedError);
+      return assert.isRejected(container.stop(), NotModifiedError);
     });
   });
 
@@ -74,7 +74,7 @@ describe('Container', function () {
       function (done) {
         assertEvents(container, [ 'die', 'kill' ], done);
         container.State.Running = true;
-        assert.isFulfilled(container.stop('kill'))
+        return assert.isFulfilled(container.stop('kill'))
           .then(function (c) {
             assert.equal(c.State.Running, false);
             assert.deepPropertyVal(c, 'State.ExitCode', 0);
@@ -84,7 +84,7 @@ describe('Container', function () {
     it('should stop via kill and emit the correct events', function (done) {
       assertEvents(container, [ 'die', 'kill' ], done);
       container.State.Running = true;
-      assert.isFulfilled(container.stop('kill', 'SIGKILL'))
+      return assert.isFulfilled(container.stop('kill', 'SIGKILL'))
         .then(function (c) {
           assert.deepPropertyVal(c, 'State.Running', false);
           assert.deepPropertyVal(c, 'State.ExitCode', 1);
@@ -94,7 +94,7 @@ describe('Container', function () {
       function (done) {
         assertEvents(container, [ 'die', 'kill' ], done);
         container.State.Running = true;
-        assert.isFulfilled(container.stop('kill', 'SIGINT'))
+        return assert.isFulfilled(container.stop('kill', 'SIGINT'))
           .then(function (c) {
             assert.deepPropertyVal(c, 'State.Running', false);
             assert.deepPropertyVal(c, 'State.ExitCode', 0);

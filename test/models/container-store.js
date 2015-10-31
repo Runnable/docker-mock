@@ -26,12 +26,12 @@ describe('Container Store', function () {
 
   describe('findOneByName', function () {
     it('should find something by name', function () {
-      assert.isFulfilled(containers.findOneByName('test-container'))
+      return assert.isFulfilled(containers.findOneByName('test-container'))
         .then(function (o) { assert.deepEqual(o, container); });
     });
 
     it('should return NotFoundError if cannot find container', function () {
-      assert.isRejected(
+      return assert.isRejected(
         containers.findOneByName('nope-container'),
         NotFoundError
       );
@@ -40,15 +40,15 @@ describe('Container Store', function () {
 
   describe('findOneByIdOrName', function () {
     it('should find one by name', function () {
-      assert.isFulfilled(containers.findOneByIdOrName('test-container'))
+      return assert.isFulfilled(containers.findOneByIdOrName('test-container'))
         .then(function (o) { assert.deepEqual(o, container); });
     });
     it('should find one by id', function () {
-      assert.isFulfilled(containers.findOneByIdOrName(4))
+      return assert.isFulfilled(containers.findOneByIdOrName(4))
         .then(function (o) { assert.deepEqual(o, container); });
     });
     it('should return a not found error if both fail', function () {
-      assert.isRejected(containers.findOneByIdOrName(-1), NotFoundError);
+      return assert.isRejected(containers.findOneByIdOrName(-1), NotFoundError);
     });
   });
 
@@ -62,13 +62,13 @@ describe('Container Store', function () {
         assert.deepEqual(c, container);
         count.next();
       });
-      assert.isFulfilled(containers.deleteById(4));
+      return assert.isFulfilled(containers.deleteById(4));
     });
   });
 
   describe('listContainers', function () {
     it('should list containers', function () {
-      assert.isFulfilled(containers.listContainers())
+      return assert.isFulfilled(containers.listContainers())
         .then(function (containers) {
           assert.lengthOf(containers, 1);
           assert.propertyVal(containers[0], 'Id', 4);
@@ -79,7 +79,7 @@ describe('Container Store', function () {
 
   describe('createContainer', function () {
     it('should create a container', function () {
-      assert.isFulfilled(containers.createContainer({}))
+      return assert.isFulfilled(containers.createContainer({}))
         .then(function () {
           return containers.listContainers();
         })
@@ -95,7 +95,7 @@ describe('Container Store', function () {
         assert.equal(type, expectedEvent);
         count.next();
       });
-      assert.isFulfilled(containers.createContainer({}))
+      return assert.isFulfilled(containers.createContainer({}))
         .then(function (container) {
           return container.start();
         });

@@ -20,32 +20,32 @@ describe('Image Store', function () {
 
   describe('findOneByName', function () {
     it('should find an image by name', function () {
-      assert.isFulfilled(images.findOneByName('ubuntu'))
+      return assert.isFulfilled(images.findOneByName('ubuntu'))
         .then(function (o) { assert.deepEqual(o, image); });
     });
     it('should find an image by name with tag', function () {
-      assert.isFulfilled(images.findOneByName('ubuntu:latest'))
+      return assert.isFulfilled(images.findOneByName('ubuntu:latest'))
         .then(function (o) { assert.deepEqual(o, image); });
     });
     it('should find an image by id', function () {
-      assert.isFulfilled(images.findOneByName('4'))
+      return assert.isFulfilled(images.findOneByName('4'))
         .then(function (o) { assert.deepEqual(o, image); });
     });
 
     it('should return NotFoundError if cannot find image', function () {
-      assert.isRejected(images.findOneByName('node'), NotFoundError);
+      return assert.isRejected(images.findOneByName('node'), NotFoundError);
     });
     it('should return NotFoundError if image was lost', function () {
       // this is a really weird state, but we'll test for it
       // the tag still exists, but the image does not
       delete images._store['4'];
-      assert.isRejected(images.findOneByName('ubuntu'), NotFoundError);
+      return assert.isRejected(images.findOneByName('ubuntu'), NotFoundError);
     });
   });
 
   describe('deleteByName', function () {
     it('should delete an image', function () {
-      assert.isFulfilled(images.deleteByName('ubuntu'))
+      return assert.isFulfilled(images.deleteByName('ubuntu'))
         .then(function () { return images.listImages(); })
         .then(function (images) { assert.lengthOf(images, 0); });
     });
@@ -54,12 +54,12 @@ describe('Image Store', function () {
   describe('listImages', function () {
     it('should list images', function () {
       images._tags.foo = 'bar';
-      assert.isFulfilled(images.listImages())
+      return assert.isFulfilled(images.listImages())
         .then(function (images) { assert.lengthOf(images, 1); });
     });
     it('should list images with container config', function () {
       image.container_config = {}; // eslint-disable-line camelcase
-      assert.isFulfilled(images.listImages())
+      return assert.isFulfilled(images.listImages())
         .then(function (images) { assert.lengthOf(images, 1); });
     });
   });
@@ -68,7 +68,7 @@ describe('Image Store', function () {
     it('should save a container', function () {
       var mockContainer = { _id: 8 };
       var query = { repo: 'test-repo' };
-      assert.isFulfilled(images.commitContainer(mockContainer, query))
+      return assert.isFulfilled(images.commitContainer(mockContainer, query))
         .then(function (image) {
           assert.ok(image.Id);
           return images.listImages();
@@ -84,7 +84,7 @@ describe('Image Store', function () {
         repo: 'test-repo',
         tag: 'not-latest'
       };
-      assert.isFulfilled(images.commitContainer(mockContainer, query))
+      return assert.isFulfilled(images.commitContainer(mockContainer, query))
         .then(function (image) {
           assert.ok(image.Id);
           return images.listImages();
@@ -103,7 +103,7 @@ describe('Image Store', function () {
         Created: undefined,
         RepoTags: ['test-repo:not-latest']
       };
-      assert.isFulfilled(images.loadImage(mockImage))
+      return assert.isFulfilled(images.loadImage(mockImage))
         .then(function () {
           return images.listImages();
         })
@@ -118,7 +118,7 @@ describe('Image Store', function () {
         Created: undefined,
         RepoTags: []
       };
-      assert.isFulfilled(images.loadImage(mockImage))
+      return assert.isFulfilled(images.loadImage(mockImage))
         .then(function () {
           return images.listImages();
         })
@@ -131,7 +131,7 @@ describe('Image Store', function () {
 
   describe('getHistory', function () {
     it('should return image history', function () {
-      assert.isFulfilled(images.getHistory('4'))
+      return assert.isFulfilled(images.getHistory('4'))
         .then(function (history) {
           assert.ok(history);
         });

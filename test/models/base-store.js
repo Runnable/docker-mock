@@ -33,14 +33,14 @@ describe('Base Store', function () {
     });
 
     it('should find something in it\'s store by id', function () {
-      assert.isFulfilled(store.findOneById(4))
+      return assert.isFulfilled(store.findOneById(4))
         .then(function (o) {
           assert.deepEqual(o, { hello: 'world' });
         });
     });
 
     it('should return NotFoundError if cannot find object', function () {
-      assert.isRejected(store.findOneById(5), BaseStore.NotFoundError);
+      return assert.isRejected(store.findOneById(5), BaseStore.NotFoundError);
     });
   });
 });
