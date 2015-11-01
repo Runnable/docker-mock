@@ -1,16 +1,11 @@
 'use strict';
 
+var chai = require('chai');
+var assert = chai.assert;
+
 var checkClean = require('./fixtures').checkClean;
 var dockerMock = require('../../lib/index');
 var request = require('request');
-
-var Lab = require('lab');
-var lab = exports.lab = Lab.script();
-var after = lab.after;
-var before = lab.before;
-var beforeEach = lab.beforeEach;
-var describe = lab.describe;
-var it = lab.it;
 
 var docker = require('dockerode')({
   host: 'http://localhost',
@@ -27,20 +22,28 @@ describe('docker misc', function () {
 
   describe('/info', function () {
     it('should return info data', function (done) {
-      docker.info(done);
+      docker.info(function (err, data) {
+        if (err) { return done(err); }
+        assert.propertyVal(data, 'Mock', true);
+        done();
+      });
     });
   });
 
   describe('/version', function () {
     it('should return version data', function (done) {
-      docker.version(done);
+      docker.version(function (err, data) {
+        if (err) { return done(err); }
+        assert.ok(data.Os);
+        done();
+      });
     });
   });
 
   describe('invalid endpoints', function () {
     it('should respond with an error', function (done) {
       request.get('http://localhost:5354/_nope', function (err, res) {
-        if (err && res.statusCode === 501) {
+        if (err) {
           done(err);
         } else if (res.statusCode !== 501) {
           done('should have sent a 501 error');

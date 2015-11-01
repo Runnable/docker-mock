@@ -1,19 +1,13 @@
 'use strict';
 
-var JSONStream = require('JSONStream');
+var chai = require('chai');
+var assert = chai.assert;
+
 var async = require('async');
 var checkClean = require('./fixtures').checkClean;
 var createCount = require('callback-count');
 var dockerMock = require('../../lib/index');
-
-var Lab = require('lab');
-var lab = exports.lab = Lab.script();
-var after = lab.after;
-var before = lab.before;
-var beforeEach = lab.beforeEach;
-var describe = lab.describe;
-var expect = require('code').expect;
-var it = lab.it;
+var JSONStream = require('JSONStream');
 
 var docker = require('dockerode')({
   host: 'http://localhost',
@@ -35,10 +29,10 @@ describe('events', function () {
         if (err) { return done(err); }
         var count = createCount(100, done);
         eventStream.pipe(JSONStream.parse()).on('data', function (json) {
-          expect(json.status).to.be.a.string();
-          expect(json.id).to.be.a.string();
-          expect(json.from).to.be.a.string();
-          expect(json.time).to.be.a.number();
+          assert.isString(json.status);
+          assert.isString(json.id);
+          assert.isString(json.from);
+          assert.isNumber(json.time);
           count.next();
         });
       }
@@ -52,10 +46,10 @@ describe('events', function () {
         if (err) { return done(err); }
         var count = createCount(100, done);
         eventStream.pipe(JSONStream.parse()).on('data', function (json) {
-          expect(json.status).to.be.a.string();
-          expect(json.id).to.be.a.string();
-          expect(json.from).to.be.a.string();
-          expect(json.time).to.be.a.number();
+          assert.isString(json.status);
+          assert.isString(json.id);
+          assert.isString(json.from);
+          assert.isNumber(json.time);
           count.next();
         });
       }
@@ -78,10 +72,10 @@ describe('events', function () {
       var i = 0;
       eventStream.on('data', function (data) {
         var json = JSON.parse(data.toString());
-        expect(json.status).to.be.a.string();
-        expect(json.id).to.be.a.string();
-        expect(json.from).to.be.a.string();
-        expect(json.time).to.be.a.number();
+        assert.isString(json.status);
+        assert.isString(json.id);
+        assert.isString(json.from);
+        assert.isNumber(json.time);
         if (i++ === 9) {
           // this destroys the _socket_
           eventStream.destroy();
@@ -117,11 +111,11 @@ describe('events', function () {
         eventStream.on('data', function (data) {
           var json = JSON.parse(data.toString());
           var expectedEvent = expectedEvents.shift();
-          expect(json.status).to.be.a.string();
-          expect(json.status).to.equal(expectedEvent);
-          expect(json.id).to.be.a.string();
-          expect(json.from).to.be.a.string();
-          expect(json.time).to.be.a.number();
+          assert.isString(json.status);
+          assert.equal(json.status, expectedEvent);
+          assert.isString(json.id);
+          assert.isString(json.from);
+          assert.isNumber(json.time);
           if (expectedEvents.length === 0) {
             eventStream.destroy();
           }
@@ -152,10 +146,10 @@ describe('events', function () {
       var i = 0;
       eventStream.on('data', function (data) {
         var json = JSON.parse(data.toString());
-        expect(json.status).to.be.a.string();
-        expect(json.id).to.be.a.string();
-        expect(json.from).to.be.a.string();
-        expect(json.time).to.be.a.number();
+        assert.isString(json.status);
+        assert.isString(json.id);
+        assert.isString(json.from);
+        assert.isNumber(json.time);
         if (i++ >= 5) {
           // this destroys the _socket_
           return eventStream.destroy();

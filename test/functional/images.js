@@ -1,5 +1,8 @@
 'use strict';
 
+var chai = require('chai');
+var assert = chai.assert;
+
 var async = require('async');
 var checkClean = require('./fixtures').checkClean;
 var createCount = require('callback-count');
@@ -12,16 +15,6 @@ var tar = require('tar-stream');
 var watchBuild = require('./fixtures').watchBuild;
 var watchBuildFail = require('./fixtures').watchBuildFail;
 var zlib = require('zlib');
-
-var Lab = require('lab');
-var lab = exports.lab = Lab.script();
-var after = lab.after;
-var afterEach = lab.afterEach;
-var before = lab.before;
-var beforeEach = lab.beforeEach;
-var describe = lab.describe;
-var expect = require('code').expect;
-var it = lab.it;
 
 var docker = require('dockerode')({
   host: 'http://localhost',
@@ -68,10 +61,9 @@ describe('images', function () {
     it('should allow image mocking of Created timestamp', function (done) {
       docker.listImages(function (err, images) {
         if (err) { return done(err); }
-        expect(images).to.have.length(2);
-        expect(images[0].Created).to.equal(100);
-        expect(images[1].Created)
-          .to.be.about(Math.floor(Date.now() / 1000), 10);
+        assert.lengthOf(images, 2);
+        assert.equal(images[0].Created, 100);
+        assert.closeTo(images[1].Created, Math.floor(Date.now() / 1000), 10);
         done();
       });
     });
@@ -160,7 +152,7 @@ describe('images', function () {
   it('should list all the images when there are none', function (done) {
     docker.listImages({}, function (err, images) {
       if (err) { return done(err); }
-      expect(images).to.have.length(0);
+      assert.lengthOf(images, 0);
       done();
     });
   });
@@ -226,18 +218,17 @@ describe('images', function () {
     it('should list all the images', function (done) {
       docker.listImages(function (err, images) {
         if (err) { return done(err); }
-        expect(images).to.have.length(2);
-        expect(images[0].RepoTags).to.have.length(1);
-        expect(images[0].RepoTags[0]).to.equal('testImage:latest');
-        expect(images[0].Created).to.be.a.number();
-        expect(images[0].Created)
-          .to.be.about(Math.floor(Date.now() / 1000), 10);
+        assert.lengthOf(images, 2);
+        assert.lengthOf(images[0].RepoTags, 1);
+        assert.equal(images[0].RepoTags[0], 'testImage:latest');
+        assert.isNumber(images[0].Created);
+        assert.closeTo(images[0].Created, Math.floor(Date.now() / 1000), 10);
         done();
       });
     });
     it('should 404 on save image if it does not exist', function (done) {
       docker.getImage('fake').get(function (err) {
-        expect(err.statusCode).to.equal(404);
+        assert.equal(err.statusCode, 404);
         done();
       });
     });
@@ -262,7 +253,7 @@ describe('images', function () {
           docker.listImages(function (err, images) {
             if (err) { return cb(err); }
             // the tarball has 3 images and no repotag: three layers expected
-            expect(images.length - numImages).to.equal(3);
+            assert.equal(images.length - numImages, 3);
             cb();
           });
         }
@@ -280,7 +271,7 @@ describe('images', function () {
       docker.getImage('testImage')
         .history(function (err, history) {
           if (err) { return done(err); }
-          expect(history).to.have.length(1);
+          assert.lengthOf(history, 1);
           done();
         });
     });
@@ -288,14 +279,14 @@ describe('images', function () {
       docker.getImage('nopeImage')
         .history(function (err) {
           if (!err) { return done(new Error('expected an error')); }
-          expect(err.statusCode).to.equal(404);
+          assert.equal(err.statusCode, 404);
           done();
         });
     });
     it('should not push an image if it doesnt exist', function (done) {
       docker.getImage('nonexistantImage')
         .push({}, handleStream(function (err) {
-          expect(err.statusCode).to.equal(404);
+          assert.equal(err.statusCode, 404);
           done();
         }));
     });
@@ -322,7 +313,7 @@ describe('images', function () {
       it('should not push a private image if it doesnt exist', function (done) {
         docker.getImage('private.com/hey/nonexistantImage')
           .push({}, handleStream(function (err) {
-            expect(err.statusCode).to.equal(404);
+            assert.equal(err.statusCode, 404);
             done();
           }));
       });

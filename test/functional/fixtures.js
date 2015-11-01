@@ -1,7 +1,8 @@
 'use strict';
 
+var assert = require('chai').assert;
+
 var async = require('async');
-var expect = require('code').expect;
 var isFunction = require('101/is-function');
 var noop = require('101/noop');
 
@@ -20,7 +21,7 @@ var fixtures = module.exports = {
     async.waterfall([
       docker.listImages.bind(docker, {}),
       function (images, _cb) {
-        expect(images.length).to.equal(0);
+        assert.lengthOf(images, 0);
         _cb();
       }
     ], done);
@@ -29,7 +30,7 @@ var fixtures = module.exports = {
     async.waterfall([
       docker.listContainers.bind(docker),
       function (containers, _cb) {
-        expect(containers.length).to.equal(0);
+        assert.lengthOf(containers, 0);
         _cb();
       }
     ], done);
@@ -38,9 +39,9 @@ var fixtures = module.exports = {
     async.waterfall([
       docker.info.bind(docker),
       function (data, _cb) {
-        expect(data.Containers).to.equal(0);
-        expect(data.Images).to.equal(0);
-        expect(data.Mock).to.be.true();
+        assert.equal(data.Containers, 0);
+        assert.equal(data.Images, 0);
+        assert.equal(data.Mock, true);
         _cb();
       }
     ], done);

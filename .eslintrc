@@ -1,5 +1,6 @@
-env: 
+env:
   node: true
+  mocha: true
 
 rules:
   array-bracket-spacing: [2, "always", { "singleValue": false }]
@@ -47,4 +48,3 @@ rules:
   strict: [2, "global"]
   use-isnan: 2
   valid-jsdoc: 2
-
