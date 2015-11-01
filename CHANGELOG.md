@@ -1,5 +1,9 @@
 ## Change Log
 
+### upcoming (2015/11/01 01:57 +00:00)
+- [#51](https://github.com/Runnable/docker-mock/pull/51) Update Deps; Mocha + Chai (@bkendall)
+- [#50](https://github.com/Runnable/docker-mock/pull/50) travis badge for master (@bkendall)
+
 ### v5.1.0 (2015/10/21 23:35 +00:00)
 - [#49](https://github.com/Runnable/docker-mock/pull/49) control exit code via kill signals (@tjmehta)
 
