@@ -1,10 +1,10 @@
-'use strict';
+'use strict'
 
-var assert = require('chai').assert;
+var assert = require('chai').assert
 
-var async = require('async');
-var isFunction = require('101/is-function');
-var noop = require('101/noop');
+var async = require('async')
+var isFunction = require('101/is-function')
+var noop = require('101/noop')
 
 var fixtures = module.exports = {
   checkClean: function (docker, done) {
@@ -14,79 +14,79 @@ var fixtures = module.exports = {
       fixtures.checkContainers.bind(null, docker),
       fixtures.checkInfo.bind(null, docker)
     ], function (err) {
-      done(err);
-    });
+      done(err)
+    })
   },
   checkImages: function (docker, done) {
     async.waterfall([
       docker.listImages.bind(docker, {}),
       function (images, _cb) {
-        assert.lengthOf(images, 0);
-        _cb();
+        assert.lengthOf(images, 0)
+        _cb()
       }
-    ], done);
+    ], done)
   },
   checkContainers: function (docker, done) {
     async.waterfall([
       docker.listContainers.bind(docker),
       function (containers, _cb) {
-        assert.lengthOf(containers, 0);
-        _cb();
+        assert.lengthOf(containers, 0)
+        _cb()
       }
-    ], done);
+    ], done)
   },
   checkInfo: function (docker, done) {
     async.waterfall([
       docker.info.bind(docker),
       function (data, _cb) {
-        assert.equal(data.Containers, 0);
-        assert.equal(data.Images, 0);
-        assert.equal(data.Mock, true);
-        _cb();
+        assert.equal(data.Containers, 0)
+        assert.equal(data.Images, 0)
+        assert.equal(data.Mock, true)
+        _cb()
       }
-    ], done);
+    ], done)
   },
   watchBuild: function (removeImage, done) {
     if (isFunction(removeImage)) {
-      done = removeImage;
-      removeImage = false;
+      done = removeImage
+      removeImage = false
     }
     return function (err, res) {
-      if (err) { return done(err); }
-      res.on('data', noop);
+      if (err) { return done(err) }
+      res.on('data', noop)
       res.on('end', function () {
         if (removeImage) {
-          removeImage.remove(done);
+          removeImage.remove(done)
         } else {
-          done();
+          done()
         }
-      });
-    };
+      })
+    }
   },
   watchBuildFail: function (done) {
     return function (err) {
       if (err && err.statusCode === 500) {
-        done();
+        done()
       } else {
-        done('expected to fail');
+        done('expected to fail')
       }
-    };
+    }
   },
   handleStream: function (done) {
     return function (funcErr, res) {
       if (funcErr) {
-        done(funcErr);
+        done(funcErr)
       } else {
-        var errorred = false;
+        var errorred = false
         res.on('error', function (err) {
-          errorred = err;
-          done(err);
-        });
-        res.on('data', noop);
+          errorred = err
+          done(err)
+        })
+        res.on('data', noop)
         res.on('end', function () {
-          if (!errorred) { done(); }
-        });
+          if (!errorred) { done() }
+        })
       }
-    };
+    }
   }
-};
+}
