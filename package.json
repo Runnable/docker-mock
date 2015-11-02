@@ -11,9 +11,9 @@
     "coverage-check": "istanbul check-coverage && echo 'Coverage check successful!'",
     "coverage": "istanbul cover ./node_modules/.bin/_mocha -- $npm_package_options_mocha test/models test/utils && npm run coverage-check",
     "coveralls": "cat ./coverage/lcov.info | coveralls",
-    "format": "standard --format .",
+    "format": "standard --format",
     "functional": "NODE_ENV=test mocha $npm_package_options_mocha test",
-    "lint": "standard .",
+    "lint": "standard",
     "test": "npm run lint && npm run unit && npm run functional",
     "unit": "NODE_ENV=test mocha $npm_package_options_mocha test/models test/utils"
   },
