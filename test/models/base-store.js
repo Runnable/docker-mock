@@ -14,7 +14,7 @@ describe('Base Store', function () {
   describe('NotModifiedError', function () {
     it('should expose NotModifiedError', function () {
       assert.ok(BaseStore.NotModifiedError);
-      assert.doesNotThrow(function () { new BaseStore.NotModifiedError(); });
+      assert.doesNotThrow(function () { return new BaseStore.NotModifiedError(); });
       assert.ok(new BaseStore.NotModifiedError());
     });
   });
@@ -22,7 +22,7 @@ describe('Base Store', function () {
   describe('NotFoundError', function () {
     it('should expose NotFoundError', function () {
       assert.ok(BaseStore.NotFoundError);
-      assert.doesNotThrow(function () { new BaseStore.NotFoundError(); });
+      assert.doesNotThrow(function () { return new BaseStore.NotFoundError(); });
       assert.ok(new BaseStore.NotFoundError());
     });
   });
@@ -32,7 +32,7 @@ describe('Base Store', function () {
       store._store[4] = { hello: 'world' };
     });
 
-    it('should find something in it\'s store by id', function () {
+    it("should find something in it's store by id", function () {
       return assert.isFulfilled(store.findOneById(4))
         .then(function (o) {
           assert.deepEqual(o, { hello: 'world' });

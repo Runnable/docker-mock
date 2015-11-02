@@ -74,7 +74,7 @@ describe('images', function () {
     pack.entry({ name: './', type: 'directory' });
     pack.entry({ name: './Dockerfile' }, 'FROM ubuntu\nADD ./src /root/src\n');
     pack.entry({ name: './src', type: 'directory' });
-    pack.entry({ name: './src/index.js' }, 'console.log(\'hello\');\n');
+    pack.entry({ name: './src/index.js' }, "console.log('hello');\n");
     pack.finalize();
     var image = docker.getImage('buildTest');
     docker.buildImage(pack, { t: 'buildTest' }, watchBuild(image, done));
@@ -84,7 +84,7 @@ describe('images', function () {
     pack.entry({ name: './', type: 'directory' });
     pack.entry({ name: './Dockerfile' }, 'FROM ubuntu\nADD ./src /root/src\n');
     pack.entry({ name: './src', type: 'directory' });
-    pack.entry({ name: './src/index.js' }, 'console.log(\'hello\');\n');
+    pack.entry({ name: './src/index.js' }, "console.log('hello');\n");
     pack.finalize();
     docker.buildImage(
       pack,
@@ -98,7 +98,7 @@ describe('images', function () {
       pack.entry({ name: './Dockerfile' },
         'FROM ubuntu\nADD ./src /root/src\n');
       pack.entry({ name: './src', type: 'directory' });
-      pack.entry({ name: './src/index.js' }, 'console.log(\'hello\');\n');
+      pack.entry({ name: './src/index.js' }, "console.log('hello');\n");
       pack.finalize();
       var image = docker.getImage('docker-mock/buildTest');
       docker.buildImage(
@@ -108,14 +108,14 @@ describe('images', function () {
     }
   );
   it('should be able to build images with registry/namespace/repository, ' +
-    'and delete it',
+  'and delete it',
     function (done) {
       var pack = tar.pack();
       pack.entry({ name: './', type: 'directory' });
       pack.entry({ name: './Dockerfile' },
         'FROM ubuntu\nADD ./src /root/src\n');
       pack.entry({ name: './src', type: 'directory' });
-      pack.entry({ name: './src/index.js' }, 'console.log(\'hello\');\n');
+      pack.entry({ name: './src/index.js' }, "console.log('hello');\n");
       pack.finalize();
       var image = docker.getImage('private.com/docker-mock/buildTest');
       docker.buildImage(pack,
@@ -127,7 +127,7 @@ describe('images', function () {
     var badPack = tar.pack();
     badPack.entry({ name: './', type: 'directory' });
     badPack.entry({ name: './src', type: 'directory' });
-    badPack.entry({ name: './src/index.js' }, 'console.log(\'hello\');\n');
+    badPack.entry({ name: './src/index.js' }, "console.log('hello');\n");
     badPack.finalize();
     docker.buildImage(badPack, { t: 'buildTest' }, watchBuildFail(done));
   });
@@ -136,7 +136,7 @@ describe('images', function () {
     pack.entry({ name: './', type: 'directory' });
     pack.entry({ name: './Dockerfile' }, 'FROM ubuntu\nADD ./src /root/src\n');
     pack.entry({ name: './src', type: 'directory' });
-    pack.entry({ name: './src/index.js' }, 'console.log(\'hello\');\n');
+    pack.entry({ name: './src/index.js' }, "console.log('hello');\n");
     pack.finalize();
     pack = pack.pipe(zlib.createGzip());
     var image = docker.getImage('buildTest');
@@ -189,7 +189,7 @@ describe('images', function () {
       pack.entry({ name: './Dockerfile' },
         'FROM ubuntu\nADD ./src /root/src\n');
       pack.entry({ name: './src', type: 'directory' });
-      pack.entry({ name: './src/index.js' }, 'console.log(\'hello\');\n');
+      pack.entry({ name: './src/index.js' }, "console.log('hello');\n");
       pack.finalize();
       docker.buildImage(pack, { t: 'testImage' }, watchBuild(done));
     });
@@ -199,7 +199,7 @@ describe('images', function () {
       pack.entry({ name: './Dockerfile' },
         'FROM ubuntu\nADD ./src /root/src\n');
       pack.entry({ name: './src', type: 'directory' });
-      pack.entry({ name: './src/index.js' }, 'console.log(\'hello\');\n');
+      pack.entry({ name: './src/index.js' }, "console.log('hello');\n");
       pack.finalize();
       docker.buildImage(
         pack,
@@ -298,7 +298,7 @@ describe('images', function () {
         pack.entry({ name: './Dockerfile' },
           'FROM ubuntu\nADD ./src /root/src\n');
         pack.entry({ name: './src', type: 'directory' });
-        pack.entry({ name: './src/index.js' }, 'console.log(\'hello\');\n');
+        pack.entry({ name: './src/index.js' }, "console.log('hello');\n");
         pack.finalize();
         repo = 'private.com/hey/testImage';
         docker.buildImage(pack, { t: repo }, watchBuild(done));
