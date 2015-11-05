@@ -10,7 +10,7 @@ var StringStream = require('../../lib/utils/string-stream');
 describe('string-stream', function () {
   it('should not allow passing it a string', function () {
     assert.throws(
-      function () { new StringStream({}); },
+      function () { return new StringStream({}); },
       Error,
       'first argument must be a string'
     );

@@ -45,7 +45,7 @@ describe('Container', function () {
     });
   });
 
-  describe('restart (it\'s start/stop)', function () {
+  describe("restart (it's start/stop)", function () {
     it('should start and emit the correct events', function (done) {
       assertEvents(container, [ 'start', 'restart' ], done);
       // start(true) => restart
