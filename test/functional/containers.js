@@ -62,6 +62,19 @@ describe('containers', function () {
       docker.getContainer(createData.name).remove(done)
     })
   })
+  it('should fail to create a named container if name is already in use', function (done) {
+    var createData = {
+      name: 'CoolContainer'
+    }
+    async.series([
+      docker.createContainer.bind(docker, createData),
+      docker.createContainer.bind(docker, createData)
+    ], function (err, results) {
+      assert.ok(results[0].id)
+      assert.equal(err.statusCode, 409)
+      docker.getContainer(results[0].id).remove(done)
+    })
+  })
   it('should list all the containers when there are none', function (done) {
     docker.listContainers(function (err, containers) {
       if (err) { return done(err) }
