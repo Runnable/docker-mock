@@ -41,15 +41,24 @@ describe('containers', function () {
     async.waterfall([
       docker.createContainer.bind(docker, createData),
       function (container, cb) {
-        container.inspect(cb)
+        async.parallel([
+          container.inspect.bind(container),
+          docker.listContainers.bind(docker)
+        ], function (err, results) {
+          cb(err, results)
+        })
       }
-    ], function (err, containerData) {
+    ], function (err, results) {
       if (err) { return done(err) }
+      var containerData = results[0]
+      var containers = results[1]
       // this should be capitalized and used
       assert.propertyVal(containerData, 'Name', '/' + createData.name)
       assert.isArray(containerData.Env)
       assert.lengthOf(containerData.Env, 1)
       assert.equal(containerData.Env[0], createData.Env[0])
+      assert.lengthOf(containers, 1)
+      assert.deepEqual(containers[0].Names, ['/hello'])
       docker.getContainer(createData.name).remove(done)
     })
   })
