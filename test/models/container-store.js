@@ -8,6 +8,7 @@ var ContainerStore = require('../../lib/models/container-store')
 var createCount = require('callback-count')
 var EventEmitter = require('events').EventEmitter
 var NotFoundError = require('../../lib/models/base-store').NotFoundError
+var ConflictError = require('../../lib/models/base-store').ConflictError
 
 describe('Container Store', function () {
   var containers
@@ -86,6 +87,20 @@ describe('Container Store', function () {
         .then(function (containers) {
           assert.lengthOf(containers, 2)
         })
+    })
+    it('should create a container with a name', function () {
+      return assert.isFulfilled(containers.createContainer({name: 'new-container'}))
+        .then(function () {
+          return containers.listContainers()
+        })
+        .then(function (containers) {
+          assert.lengthOf(containers, 2)
+        })
+    })
+    it('should reject creating a container with an existing name with ConflictError', function () {
+      return assert.isRejected(
+        containers.createContainer({name: 'test-container'}), ConflictError
+      )
     })
     it('should register for container events and emit create', function (done) {
       var expectedEvents = [ 'create', 'start' ]
