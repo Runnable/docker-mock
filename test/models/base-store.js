@@ -27,6 +27,14 @@ describe('Base Store', function () {
     })
   })
 
+  describe('ConflictError', function () {
+    it('should expose ConflictError', function () {
+      assert.ok(BaseStore.ConflictError)
+      assert.doesNotThrow(function () { return new BaseStore.ConflictError() })
+      assert.ok(new BaseStore.ConflictError())
+    })
+  })
+
   describe('findOneById', function () {
     before(function () {
       store._store[4] = { hello: 'world' }
