@@ -1,6 +1,11 @@
 ## Change Log
 
-### upcoming (2015/11/01 01:57 +00:00)
+### v5.2.0 (2015/12/25 17:56 +00:00)
+- [#55](https://github.com/Runnable/docker-mock/pull/55) Handle name when creating a container and returning list of containers (@doganyazar)
+- [#54](https://github.com/Runnable/docker-mock/pull/54) Standard (@bkendall)
+- [#53](https://github.com/Runnable/docker-mock/pull/53) SemiStandard (@bkendall)
+
+### v5.1.1 (2015/11/01 01:57 +00:00)
 - [#51](https://github.com/Runnable/docker-mock/pull/51) Update Deps; Mocha + Chai (@bkendall)
 - [#50](https://github.com/Runnable/docker-mock/pull/50) travis badge for master (@bkendall)
 
