@@ -99,6 +99,59 @@ describe('Container Store', function () {
     })
   })
 
+  describe('_runFilters', function () {
+    var light
+    var dark
+    var list
+    beforeEach(function () {
+      light = {
+        Labels: { side: 'light' },
+        State: { Running: true }
+      }
+      dark = {
+        Labels: { side: 'dark' },
+        State: { Running: false }
+      }
+      list = [ light, dark ]
+    })
+
+    it('should return the given list w/o any filters', function () {
+      var filtered = ContainerStore._runFilters(list, [])
+      assert.deepEqual(filtered, list)
+    })
+
+    it('should ignore values without labels', function () {
+      var filters = {
+        label: { side: 'light' }
+      }
+      list.push({ State: { Running: true } })
+      var filtered = ContainerStore._runFilters(list, filters)
+      assert.deepEqual(filtered, [light])
+    })
+
+    it('should filter on labels', function () {
+      var filters = {
+        label: { side: 'light' }
+      }
+      var filtered = ContainerStore._runFilters(list, filters)
+      assert.deepEqual(filtered, [light])
+      filters.label.side = 'dark'
+      filtered = ContainerStore._runFilters(list, filters)
+      assert.deepEqual(filtered, [dark])
+    })
+
+    it('should filter on status', function () {
+      var filters = {
+        status: 'running'
+      }
+      var filtered = ContainerStore._runFilters(list, filters)
+      assert.deepEqual(filtered, [light])
+      filters.status = 'exited'
+      filtered = ContainerStore._runFilters(list, filters)
+      assert.deepEqual(filtered, [dark])
+    })
+  })
+
   describe('createContainer', function () {
     it('should create a container', function () {
       return assert.isFulfilled(containers.createContainer({}))
