@@ -78,7 +78,7 @@ describe('Container Store', function () {
           assert.propertyVal(containers[0], 'Image', 'ubuntu')
         })
     })
-    it('should list containers with a postive filter', function (done) {
+    it('should list containers with a postive filter', function () {
       var filters = {
         status: 'running'
       }
@@ -88,7 +88,7 @@ describe('Container Store', function () {
           assert.equal(containers[0].State.Running, true)
         })
     })
-    it('should list containers with a negative filter', function (done) {
+    it('should list containers with a negative filter', function () {
       var filters = {
         label: { type: 'test-label' }
       }
