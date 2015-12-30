@@ -15,4 +15,5 @@ script:
   - npm run coverage
   - npm run functional
 after_script:
+  - npm run coverage
   - PATH=$NVM_BIN:$PATH codeclimate-test-reporter < ./coverage/lcov.info
