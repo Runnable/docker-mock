@@ -4,8 +4,8 @@ var chai = require('chai')
 var assert = chai.assert
 
 var assign = require('101/assign')
-var ImageStore = require('../../lib/models/image-store')
-var NotFoundError = require('../../lib/models/base-store').NotFoundError
+var ImageStore = require('../../../lib/models/image-store')
+var NotFoundError = require('../../../lib/models/base-store').NotFoundError
 
 describe('Image Store', function () {
   var images

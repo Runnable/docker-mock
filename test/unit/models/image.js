@@ -3,7 +3,7 @@
 var chai = require('chai')
 var assert = chai.assert
 
-var Image = require('../../lib/models/image')
+var Image = require('../../../lib/models/image')
 
 describe('Image', function () {
   it('should exist', function () {

@@ -4,11 +4,11 @@ var chai = require('chai')
 var assert = chai.assert
 
 var assign = require('101/assign')
-var ContainerStore = require('../../lib/models/container-store')
+var ContainerStore = require('../../../lib/models/container-store')
 var createCount = require('callback-count')
 var EventEmitter = require('events').EventEmitter
-var NotFoundError = require('../../lib/models/base-store').NotFoundError
-var ConflictError = require('../../lib/models/base-store').ConflictError
+var NotFoundError = require('../../../lib/models/base-store').NotFoundError
+var ConflictError = require('../../../lib/models/base-store').ConflictError
 
 describe('Container Store', function () {
   var containers

@@ -3,7 +3,7 @@
 var chai = require('chai')
 var assert = chai.assert
 
-var utils = require('../../lib/utils')
+var utils = require('../../../lib/utils')
 
 describe('utils', function () {
   describe('randomId', function () {

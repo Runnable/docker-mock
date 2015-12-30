@@ -5,7 +5,7 @@ var assert = chai.assert
 
 var createCount = require('callback-count')
 
-var StringStream = require('../../lib/utils/string-stream')
+var StringStream = require('../../../lib/utils/string-stream')
 
 describe('string-stream', function () {
   it('should not allow passing it a string', function () {

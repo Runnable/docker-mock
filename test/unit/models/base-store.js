@@ -3,7 +3,7 @@
 var chai = require('chai')
 var assert = chai.assert
 
-var BaseStore = require('../../lib/models/base-store')
+var BaseStore = require('../../../lib/models/base-store')
 
 describe('Base Store', function () {
   var store
