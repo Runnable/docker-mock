@@ -2,6 +2,7 @@
 
 var chai = require('chai')
 var assert = chai.assert
+var sinon = require('sinon')
 
 var assign = require('101/assign')
 var ContainerStore = require('../../../lib/models/container-store')
@@ -69,6 +70,43 @@ describe('Container Store', function () {
     })
   })
 
+  describe('_formatQueryFilters', function () {
+    it('should do nothing without any labels', function () {
+      var obj = {}
+      assert.equal(ContainerStore._formatQueryFilters(obj), obj)
+    })
+
+    it('should leave simple labels alone', function () {
+      var filters = {
+        label: [ 'foo' ]
+      }
+      var expected = {
+        label: { foo: '' }
+      }
+      assert.deepEqual(ContainerStore._formatQueryFilters(filters), expected)
+    })
+
+    it('should split simple key values', function () {
+      var filters = {
+        label: [ 'foo=bar' ]
+      }
+      var expected = {
+        label: { foo: 'bar' }
+      }
+      assert.deepEqual(ContainerStore._formatQueryFilters(filters), expected)
+    })
+
+    it('should split complex key values and remove quotes', function () {
+      var filters = {
+        label: [ 'foo="bar=baz"' ]
+      }
+      var expected = {
+        label: { foo: 'bar=baz' }
+      }
+      assert.deepEqual(ContainerStore._formatQueryFilters(filters), expected)
+    })
+  })
+
   describe('listContainers', function () {
     it('should list containers', function () {
       return assert.isFulfilled(containers.listContainers())
@@ -105,11 +143,11 @@ describe('Container Store', function () {
     var list
     beforeEach(function () {
       light = {
-        Labels: { side: 'light' },
+        Labels: { side: 'light', name: '' },
         State: { Running: true }
       }
       dark = {
-        Labels: { side: 'dark' },
+        Labels: { side: 'dark', name: 'kyloren' },
         State: { Running: false }
       }
       list = [ light, dark ]
@@ -140,6 +178,14 @@ describe('Container Store', function () {
       assert.deepEqual(filtered, [dark])
     })
 
+    it('should work with empty strings in the label values', function () {
+      var filters = {
+        label: { name: '' }
+      }
+      var filtered = ContainerStore._runFilters(list, filters)
+      assert.deepEqual(filtered, [light])
+    })
+
     it('should filter on status', function () {
       var filters = {
         status: 'running'
@@ -152,7 +198,42 @@ describe('Container Store', function () {
     })
   })
 
+  describe('_formatBodyLabels', function () {
+    it('should return nothing if no labels are passed in', function () {
+      assert.notOk(ContainerStore._formatBodyLabels())
+    })
+
+    it('should return an object if an array is passed in', function () {
+      var arr = [ 'foo', 'bar' ]
+      var obj = {
+        foo: '',
+        bar: ''
+      }
+      assert.deepEqual(ContainerStore._formatBodyLabels(arr), obj)
+    })
+
+    it('should simply return the object if it is passed one', function () {
+      var obj = { foo: 'bar' }
+      assert.equal(ContainerStore._formatBodyLabels(obj), obj)
+    })
+
+    it('should throw an error if an array or object is not passed in', function () {
+      assert.throws(
+        function () { ContainerStore._formatBodyLabels('foobar') },
+        Error,
+        /labels is malformed/i
+      )
+    })
+  })
+
   describe('createContainer', function () {
+    beforeEach(function () {
+      sinon.spy(ContainerStore, '_formatBodyLabels')
+    })
+    afterEach(function () {
+      ContainerStore._formatBodyLabels.restore()
+    })
+
     it('should create a container', function () {
       return assert.isFulfilled(containers.createContainer({}))
         .then(function () {
@@ -162,6 +243,7 @@ describe('Container Store', function () {
           assert.lengthOf(containers, 2)
         })
     })
+
     it('should create a container with a name', function () {
       return assert.isFulfilled(containers.createContainer({name: 'new-container'}))
         .then(function () {
@@ -171,11 +253,24 @@ describe('Container Store', function () {
           assert.lengthOf(containers, 2)
         })
     })
+
+    it('should format the body-provided labels', function () {
+      var data = {
+        name: 'new-container',
+        labels: { foo: 'bar' }
+      }
+      return assert.isFulfilled(containers.createContainer(data))
+        .then(function () {
+          sinon.assert.calledOnce(ContainerStore._formatBodyLabels)
+        })
+    })
+
     it('should reject creating a container with an existing name with ConflictError', function () {
       return assert.isRejected(
         containers.createContainer({name: 'test-container'}), ConflictError
       )
     })
+
     it('should register for container events and emit create', function (done) {
       var expectedEvents = [ 'create', 'start' ]
       var count = createCount(expectedEvents.length, done)

@@ -85,35 +85,85 @@ describe('containers', function () {
 
   describe('labels', function () {
     var container
+    var otherContainer
     var Labels = {
       type: 'user-container',
       ultimateQuestion: 'batmanvssuperman',
-      obviousAnswer: 'superman'
+      obviousAnswer: 'superman',
+      secret: 'batman=superman'
     }
     beforeEach(function (done) {
-      docker.createContainer({
-        Labels: Labels
-      }, function (err, c) {
+      async.parallel({
+        c1: function (cb) { docker.createContainer({ Labels: Labels }, cb) },
+        c2: function (cb) { docker.createContainer({ Labels: ['foobar'] }, cb) }
+      }, function (err, data) {
         if (err) { return done(err) }
-        container = c
+        container = data.c1
+        otherContainer = data.c2
         done()
       })
     })
     afterEach(function (done) {
-      container.remove(done)
+      async.parallel([
+        function (cb) { container.remove(cb) },
+        function (cb) { otherContainer.remove(cb) }
+      ], done)
     })
 
-    it('should save Labels on create and respond with Labels on inspect',
-      function (done) {
-        container.inspect(function (err, data) {
-          if (err) { return done(err) }
-          Object.keys(Labels).forEach(function (l) {
-            assert.equal(data.Config.Labels[l], Labels[l])
-          })
-          done()
+    it('should save Labels on create and respond with Labels on inspect', function (done) {
+      container.inspect(function (err, data) {
+        if (err) { return done(err) }
+        Object.keys(Labels).forEach(function (l) {
+          assert.equal(data.Config.Labels[l], Labels[l])
+        })
+        done()
+      })
+    })
+
+    it('should filter on Labels', function (done) {
+      var opts = {
+        filters: JSON.stringify({
+          label: ['foobar']
         })
       }
-    )
+      docker.listContainers(opts, function (err, containers) {
+        if (err) { return done(err) }
+        assert.lengthOf(containers, 1)
+        // dockerode uses .id, not .Id
+        assert.equal(containers[0].Id, otherContainer.id)
+        done()
+      })
+    })
+
+    it('should filter on Labels with values', function (done) {
+      var opts = {
+        filters: JSON.stringify({
+          label: ['obviousAnswer=superman']
+        })
+      }
+      docker.listContainers(opts, function (err, containers) {
+        if (err) { return done(err) }
+        assert.lengthOf(containers, 1)
+        // dockerode uses .id, not .Id
+        assert.equal(containers[0].Id, container.id)
+        done()
+      })
+    })
+
+    it('should filter on Labels with complex values', function (done) {
+      var opts = {
+        filters: JSON.stringify({
+          label: ['secret="batman=superman"']
+        })
+      }
+      docker.listContainers(opts, function (err, containers) {
+        if (err) { return done(err) }
+        assert.lengthOf(containers, 1)
+        // dockerode uses .id, not .Id
+        assert.equal(containers[0].Id, container.id)
+        done()
+      })
+    })
   })
 
   describe('interactions', function () {
