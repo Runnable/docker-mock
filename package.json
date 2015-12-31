@@ -67,6 +67,7 @@
     "istanbul": "^0.4.0",
     "mocha": "^2.3.3",
     "request": "^2.51.0",
+    "sinon": "^1.17.2",
     "snazzy": "^2.0.1",
     "standard": "^5.3.1"
   }
