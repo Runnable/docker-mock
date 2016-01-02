@@ -76,6 +76,17 @@ describe('Container Store', function () {
       assert.equal(ContainerStore._formatQueryFilters(obj), obj)
     })
 
+    it('should throw if labels is not an array', function () {
+      var filters = {
+        label: {}
+      }
+      assert.throws(
+        function () { ContainerStore._formatQueryFilters(filters) },
+        Error,
+        /labels must be an array/i
+      )
+    })
+
     it('should leave simple labels alone', function () {
       var filters = {
         label: [ 'foo' ]
