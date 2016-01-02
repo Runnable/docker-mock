@@ -9,13 +9,13 @@
   "scripts": {
     "changelog": "github-changes -o Runnable -r docker-mock -a --only-pulls --use-commit-body --order-semver",
     "coverage-check": "istanbul check-coverage && echo 'Coverage check successful!'",
-    "coverage": "istanbul cover ./node_modules/.bin/_mocha -- $npm_package_options_mocha test/models test/utils && npm run coverage-check",
+    "coverage": "istanbul cover ./node_modules/.bin/_mocha -- $npm_package_options_mocha test/unit && npm run coverage-check",
     "coveralls": "cat ./coverage/lcov.info | coveralls",
     "format": "standard --format",
-    "functional": "NODE_ENV=test mocha $npm_package_options_mocha test",
+    "functional": "NODE_ENV=test mocha $npm_package_options_mocha test/functional",
     "lint": "standard",
     "test": "npm run lint && npm run unit && npm run functional",
-    "unit": "NODE_ENV=test mocha $npm_package_options_mocha test/models test/utils"
+    "unit": "NODE_ENV=test mocha $npm_package_options_mocha test/unit"
   },
   "options": {
     "mocha": "--require resources/mocha-bootstrap --timeout 5000 --recursive --reporter spec --bail"
@@ -67,6 +67,7 @@
     "istanbul": "^0.4.0",
     "mocha": "^2.3.3",
     "request": "^2.51.0",
+    "sinon": "^1.17.2",
     "snazzy": "^2.0.1",
     "standard": "^5.3.1"
   }

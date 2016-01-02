@@ -3,9 +3,9 @@
 var chai = require('chai')
 var assert = chai.assert
 
-var Container = require('../../lib/models/container')
+var Container = require('../../../lib/models/container')
 var createCount = require('callback-count')
-var NotModifiedError = require('../../lib/models/base-store').NotModifiedError
+var NotModifiedError = require('../../../lib/models/base-store').NotModifiedError
 
 describe('Container', function () {
   var container
