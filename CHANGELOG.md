@@ -1,5 +1,9 @@
 ## Change Log
 
+### v5.3.0 (2016/01/02 22:13 +00:00)
+- [#57](https://github.com/Runnable/docker-mock/pull/57) Fixing and Expanding Label Functionality (@bkendall)
+- [#56](https://github.com/Runnable/docker-mock/pull/56) cleanup: apply formatter (@bkendall)
+
 ### v5.2.0 (2015/12/25 17:56 +00:00)
 - [#55](https://github.com/Runnable/docker-mock/pull/55) Handle name when creating a container and returning list of containers (@doganyazar)
 - [#54](https://github.com/Runnable/docker-mock/pull/54) Standard (@bkendall)
