@@ -27,6 +27,16 @@ describe('Container Store', function () {
     containers = new ContainerStore()
     containers._store[4] = container
   })
+  afterEach(function () {
+    containers.removeAllListeners('event')
+    // quick way to get rid of our Store instance
+    ContainerStore._instance = null
+  })
+
+  it('should always return the same instance', function () {
+    var testContainerStore = new ContainerStore()
+    assert.equal(containers, testContainerStore)
+  })
 
   describe('findOneByName', function () {
     it('should find something by name', function () {
@@ -247,7 +257,7 @@ describe('Container Store', function () {
 
     it('should create a container', function () {
       return assert.isFulfilled(containers.createContainer({}))
-        .then(function () {
+        .then(function (newContainer) {
           return containers.listContainers()
         })
         .then(function (containers) {
@@ -256,7 +266,8 @@ describe('Container Store', function () {
     })
 
     it('should create a container with a name', function () {
-      return assert.isFulfilled(containers.createContainer({name: 'new-container'}))
+      var data = { name: 'new-container' }
+      return assert.isFulfilled(containers.createContainer(data))
         .then(function () {
           return containers.listContainers()
         })
@@ -278,7 +289,8 @@ describe('Container Store', function () {
 
     it('should reject creating a container with an existing name with ConflictError', function () {
       return assert.isRejected(
-        containers.createContainer({name: 'test-container'}), ConflictError
+        containers.createContainer({ name: 'test-container' }),
+        ConflictError
       )
     })
 

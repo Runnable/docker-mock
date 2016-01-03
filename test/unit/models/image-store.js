@@ -17,6 +17,15 @@ describe('Image Store', function () {
     images._tags['ubuntu:latest'] = '4'
     images._imageHistory['4'] = []
   })
+  afterEach(function () {
+    // quick way to get rid of our Store instance
+    ImageStore._instance = null
+  })
+
+  it('should always return the same instance', function () {
+    var testImageStore = new ImageStore()
+    assert.equal(images, testImageStore)
+  })
 
   describe('findOneByName', function () {
     it('should find an image by name', function () {
