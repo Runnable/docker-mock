@@ -4,3 +4,4 @@ coverage.html
 *.log
 .DS_Store
 lcov.info
+.editorconfig
