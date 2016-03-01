@@ -2,6 +2,7 @@
 
 var chai = require('chai')
 var assert = chai.assert
+var sinon = require('sinon')
 
 var Container = require('../../../lib/models/container')
 var createCount = require('callback-count')
@@ -100,6 +101,37 @@ describe('Container', function () {
             assert.deepPropertyVal(c, 'State.ExitCode', 0)
           })
       })
+  })
+
+  describe('stats', function () {
+    it('should start and get stats stream', function (done) {
+      var stream = require('stream')
+      var res = new stream.Transform({
+        transform: function (data, encoding, cb) {
+          cb(null, data)
+        }
+      })
+      res.writeHead = sinon.spy()
+      res.on('data', function (data) {
+        container.stop().then(function () {
+          container.onDelete()
+        })
+      })
+      res.on('end', function () {
+        assert(res.writeHead.calledOnce)
+        done()
+      })
+
+      container.getStats({query: {stream: '1'}}, res)
+      return assert.isFulfilled(container.start())
+    })
+    it('should get a single stats object', function (done) {
+      var res = {send: function () {
+        done()
+      }}
+      container.getStats({query: {stream: '0'}}, res)
+      return assert.isFulfilled(container.start())
+    })
   })
 })
 
