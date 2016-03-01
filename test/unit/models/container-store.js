@@ -23,7 +23,7 @@ describe('Container Store', function () {
       Created: Date.now(),
       State: { Running: true },
       Config: { Labels: { label: 'test-label' } },
-      onDelete: function() {}
+      onDelete: function () {}
     })
     containers = new ContainerStore()
     containers._store[4] = container
