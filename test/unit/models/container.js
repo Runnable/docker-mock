@@ -111,11 +111,14 @@ describe('Container', function () {
           cb(null, data)
         }
       })
+      var statsCount = 0
       res.writeHead = sinon.spy()
       res.on('data', function (data) {
-        container.stop().then(function () {
-          container.onDelete()
-        })
+        if (++statsCount === 2) {
+          container.stop().then(function () {
+            container.onDelete()
+          })
+        }
       })
       res.on('end', function () {
         assert(res.writeHead.calledOnce)
