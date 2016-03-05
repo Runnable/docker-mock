@@ -106,11 +106,17 @@ describe('Container', function () {
   describe('stats', function () {
     it('should start and get stats stream', function (done) {
       var stream = require('stream')
-      var res = new stream.Transform({
-        transform: function (data, encoding, cb) {
-          cb(null, data)
-        }
-      })
+      require('util').inherits(TestStream, stream.Transform)
+      function TestStream (opt) {
+        stream.Transform.call(this, opt)
+      }
+
+      TestStream.prototype._transform = function (data, encoding, cb) {
+        cb(null, data)
+      }
+
+      var res = new TestStream({})
+
       var statsCount = 0
       res.writeHead = sinon.spy()
       res.on('data', function (data) {
