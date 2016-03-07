@@ -247,7 +247,7 @@ describe('images', function () {
         },
         function loadImage (cb) {
           var imageStream = fs.createReadStream('resources/busybox.tar')
-          docker.loadImage(imageStream, cb)
+          docker.loadImage(imageStream, handleStream(cb))
         },
         function listImages (cb) {
           docker.listImages(function (err, images) {
