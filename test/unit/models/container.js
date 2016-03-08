@@ -104,36 +104,50 @@ describe('Container', function () {
   })
 
   describe('stats', function () {
-    it('should start and get stats stream', function (done) {
-      var stream = require('stream')
-      require('util').inherits(TestStream, stream.Transform)
-      function TestStream (opt) {
-        stream.Transform.call(this, opt)
-      }
+    describe('stream', function () {
+      var clock
+      beforeEach(function () {
+        clock = sinon.useFakeTimers()
+      })
+      afterEach(function () {
+        clock.restore()
+      })
 
-      TestStream.prototype._transform = function (data, encoding, cb) {
-        cb(null, data)
-      }
-
-      var res = new TestStream({})
-
-      var statsCount = 0
-      res.writeHead = sinon.spy()
-      res.on('data', function (data) {
-        if (++statsCount === 2) {
-          container.stop().then(function () {
-            container.onDelete()
-          })
+      it('should start and get stats stream', function (done) {
+        var stream = require('stream')
+        require('util').inherits(TestStream, stream.Transform)
+        function TestStream (opt) {
+          stream.Transform.call(this, opt)
         }
-      })
-      res.on('end', function () {
-        assert(res.writeHead.calledOnce)
-        done()
-      })
 
-      container.getStats({query: {stream: '1'}}, res)
-      return assert.isFulfilled(container.start())
+        TestStream.prototype._transform = function (data, encoding, cb) {
+          cb(null, data)
+        }
+
+        var res = new TestStream({})
+
+        var statsCount = 0
+        res.writeHead = sinon.spy()
+        res.on('data', function (data) {
+          if (++statsCount === 2) {
+            container.stop().then(function () {
+              container.onDelete()
+            })
+          }
+        })
+        res.on('end', function () {
+          assert(res.writeHead.calledOnce)
+          done()
+        })
+
+        container.getStats({query: {stream: '1'}}, res)
+        assert.isFulfilled(container.start())
+          .then(function () {
+            clock.tick(1100)
+          })
+      })
     })
+
     it('should get a single stats object', function (done) {
       var res = {send: function () {
         done()
