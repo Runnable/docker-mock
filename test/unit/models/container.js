@@ -149,9 +149,9 @@ describe('Container', function () {
     })
 
     it('should get a single stats object', function (done) {
-      var res = {send: function () {
-        done()
-      }}
+      var res = {
+        send: function () { done() }
+      }
       container.getStats({query: {stream: '0'}}, res)
       return assert.isFulfilled(container.start())
     })
