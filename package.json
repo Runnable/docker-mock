@@ -11,7 +11,7 @@
     "coverage-check": "istanbul check-coverage && echo 'Coverage check successful!'",
     "coverage": "istanbul cover ./node_modules/.bin/_mocha -- $npm_package_options_mocha test/unit && npm run coverage-check",
     "coveralls": "cat ./coverage/lcov.info | coveralls",
-    "format": "standard --format",
+    "format": "standard-format --write",
     "functional": "NODE_ENV=test mocha $npm_package_options_mocha test/functional",
     "lint": "standard",
     "test": "npm run lint && npm run unit && npm run functional",
@@ -42,8 +42,8 @@
     ]
   },
   "dependencies": {
-    "101": "^1.0.0",
-    "bluebird": "^3.0.2",
+    "101": "^1.5.0",
+    "bluebird": "^3.3.4",
     "body-parser": "^1.10.1",
     "callback-count": "^0.2.0",
     "duplex-emitter": "^2.1.2",
@@ -51,7 +51,7 @@
     "keypather": "^1.10.1",
     "middleware-flow": "^0.8.0",
     "minimist": "^1.1.0",
-    "object-loops": "^0.3.1",
+    "object-loops": "^0.5.1",
     "tar": "^2.1.0",
     "tar-stream": "^1.2.1"
   },
@@ -68,7 +68,8 @@
     "mocha": "^2.3.3",
     "request": "^2.51.0",
     "sinon": "^1.17.2",
-    "snazzy": "^2.0.1",
-    "standard": "^5.3.1"
+    "snazzy": "^3.0.0",
+    "standard": "^6.0.8",
+    "standard-format": "^2.1.1"
   }
 }
