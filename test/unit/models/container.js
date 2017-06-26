@@ -40,6 +40,11 @@ describe('Container', function () {
           assert.deepProperty(c, 'NetworkSettings.Ports')
         })
     })
+    it('should throw NotModifiedError if container paused', function () {
+      container.State.Running = true
+      container.State.Paused = true
+      return assert.isRejected(container.start(), NotModifiedError)
+    })
     it('should throw NotModifiedError if already started', function () {
       container.State.Running = true
       return assert.isRejected(container.start(), NotModifiedError)
@@ -101,6 +106,37 @@ describe('Container', function () {
             assert.deepPropertyVal(c, 'State.ExitCode', 0)
           })
       })
+  })
+
+  describe('pause', function () {
+    it('should pause and emit the correct events', function (done) {
+      assertEvents(container, ['pause'], done)
+      container.State.Running = true
+      return assert.isFulfilled(container.pause())
+        .then(function (c) {
+          assert.deepPropertyVal(c, 'State.Running', true)
+          assert.deepPropertyVal(c, 'State.Paused', true)
+        })
+    })
+    it('should throw NotModifiedError if not running', function () {
+      container.State.Running = false
+      return assert.isRejected(container.pause(), NotModifiedError)
+    })
+  })
+
+  describe('unpause', function () {
+    it('should unpause and emit the correct events', function (done) {
+      assertEvents(container, ['unpause'], done)
+      container.State.Paused = true
+      return assert.isFulfilled(container.unpause())
+        .then(function (c) {
+          assert.notDeepProperty(c, 'State.Paused')
+        })
+    })
+    it('should throw NotModifiedError if not paused', function () {
+      container.State.Running = true
+      return assert.isRejected(container.unpause(), NotModifiedError)
+    })
   })
 
   describe('stats', function () {
